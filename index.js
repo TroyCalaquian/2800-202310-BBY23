@@ -50,6 +50,23 @@ app.use(
   })
 );
 
+app.post("/edit", async (req, res) => {
+  var username = req.body.username;
+  var photo = req.body.photo;
+  const schema = Joi.object({
+    username: Joi.string().min(3).max(30).required(),
+  });
+
+  const validationResult = schema.validate({ username: username });
+  if (validationResult.error) {
+    console.log(validationResult.error);
+    // Possibly render an error page? Or popup?
+    return;
+  }
+
+  await userCollection.updateOne({username: req.session.username}, {$set: {username: username}});
+  res.redirect("/profile");
+});
 app.use(express.static(__dirname + "/public"));
 
 app.get("*", (req, res) => {
