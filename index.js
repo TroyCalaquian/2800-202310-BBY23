@@ -64,11 +64,11 @@ app.get('/login', (req,res) => {
 });
 
 app.post('/loggingin', async (req,res) => {
-    var username = req.body.username;
+    var email = req.body.email;
     var password = req.body.password;
 
-    const schema = Joi.string().max(20).required();
-    const validationResult = schema.validate(username);
+    const schema = Joi.string().email().required();
+    const validationResult = schema.validate(email);
     
     if (validationResult.error != null) {
       console.log(validationResult.error);
@@ -76,7 +76,7 @@ app.post('/loggingin', async (req,res) => {
       return;
     }
 
-    const result = await userCollection.find({username: username}).project({username: 1, password: 1, _id: 1}).toArray();
+    const result = await userCollection.find({email: email}).project({email: 1, password: 1, _id: 1}).toArray();
 
     console.log(result);
     if (result.length != 1) {
@@ -87,9 +87,14 @@ app.post('/loggingin', async (req,res) => {
     if (await bcrypt.compare(password, result[0].password)) {
       console.log("correct password");
       req.session.authenticated = true;
-      req.session.username = username;
+      req.session.email = email;
       req.session.cookie.maxAge = expireTime;
-
+      var user = await userCollection.findOne({ email });
+        req.session.name = user.username;
+        req.session.user = user;
+      // console.log(user)
+      // console.log("###########################")
+      // console.log(req.session.email)
       res.redirect('/loggedIn');
       return;
     }
@@ -143,11 +148,11 @@ app.post('/submitUser', async (req,res) => {
 });
 
 app.get('/welcome', (req,res) => {
-  var username = req.session.username;
+  // var username = req.session.name;
   
   if (req.session.authenticated) {
 
-      res.render("welcome", {user: username});
+      res.render("welcome", {user: req.session.name});
 
   }
   else {
