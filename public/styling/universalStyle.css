@@ -1,0 +1,10 @@
+/* The * selector will impact ALL, so be cautious */
+* {
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+
+.footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}

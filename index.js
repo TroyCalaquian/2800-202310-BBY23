@@ -92,6 +92,14 @@ app.post("/editPhoto", async (req, res) => {
 
 app.use(express.static(__dirname + "/public"));
 
+app.get("/home", (req, res) => {
+  res.render("index");
+});
+
+app.get("/profile", (req, res) => {
+  res.render("profile");
+});
+
 app.get("*", (req, res) => {
   res.status(404);
   res.render("404");
