@@ -106,6 +106,10 @@ app.get("/confirmTags", (req, res) => {
   res.render("confirmTags", {pickedTags: pickedTags, blacklistedTags: blacklistedTags});
 });
 
+app.post("/confirmChoices", async (req, res) => {
+  res.redirect("/home");
+});
+
 app.post("/editUsername", async (req, res) => {
   var username = req.body.username;
   const schema = Joi.object({
