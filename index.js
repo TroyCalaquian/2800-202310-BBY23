@@ -50,6 +50,111 @@ app.use(
   })
 );
 
+app.get('/', (req,res) => {
+    var sessionState = req.session.authenticated;
+    var username = req.session.username;
+
+    res.render("index", {isLoggedIn: sessionState, userName: username});
+});
+
+app.get('/login', (req,res) => {
+    res.render("login");
+});
+
+app.post('/loggingin', async (req,res) => {
+    var username = req.body.username;
+    var password = req.body.password;
+
+    const schema = Joi.string().max(20).required();
+    const validationResult = schema.validate(username);
+    
+    if (validationResult.error != null) {
+      console.log(validationResult.error);
+      res.redirect("/login");
+      return;
+    }
+
+    const result = await userCollection.find({username: username}).project({username: 1, password: 1, _id: 1}).toArray();
+
+    console.log(result);
+    if (result.length != 1) {
+      console.log("user not found");
+      res.redirect("/login");
+      return;
+    }
+    if (await bcrypt.compare(password, result[0].password)) {
+      console.log("correct password");
+      req.session.authenticated = true;
+      req.session.username = username;
+      req.session.cookie.maxAge = expireTime;
+
+      res.redirect('/loggedIn');
+      return;
+    }
+    else {
+        console.log("incorrect password");
+        res.render("loginfail");
+        return;
+    }
+});
+
+app.get('/loggedin', (req,res) => {
+    if (!req.session.authenticated) {
+        res.redirect('/login');
+    }
+    res.redirect('/welcome');
+    
+});
+
+app.get('/signup', (req,res) => {
+   res.render("signup");
+});
+
+// After signup, posts to this 
+
+app.post('/submitUser', async (req,res) => {
+    var username = req.body.username;
+    var email = req.body.email;
+    var password = req.body.password;
+
+    const schema = Joi.object(
+      {
+        username: Joi.string().alphanum().max(20).required(),
+        email: Joi.string().email().required(),
+        password: Joi.string().max(20).required()
+      });
+
+    const validationResult = schema.validate({username, email, password});
+    if (validationResult.error != null) {
+      console.log(validationResult.error);
+        var error = validationResult.error.details[0].message;
+        res.render("signupfail", {theError: error});
+      return;
+    }
+
+      var hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    await userCollection.insertOne({username: username, password: hashedPassword, user_type: 'user'});
+    console.log("Inserted user");
+
+      res.redirect('/welcome');
+});
+
+app.get('/welcome', (req,res) => {
+  var username = req.session.username;
+  
+  if (req.session.authenticated) {
+
+      res.render("members", {user: username});
+
+  }
+  else {
+      res.redirect('/login');
+  }
+});
+
+
+
 app.use(express.static(__dirname + "/public"));
 
 app.get("*", (req, res) => {
