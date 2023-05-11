@@ -1,7 +1,7 @@
 console.log("displayErrorURL.js Loaded");
 
 function overrideHeader() {
-    // Copy URL
+    // URL
     var urlPath = window.location.pathname;
     var urlParts = urlPath.split('/');
     
@@ -16,4 +16,8 @@ function overrideHeader() {
     
     // Override html found earlier
     badInput.innerHTML = erroneousInput;
-} overrideHeader();
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    overrideHeader();
+  });

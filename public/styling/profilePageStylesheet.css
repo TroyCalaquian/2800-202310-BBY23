@@ -1,9 +1,9 @@
-#profileDisplay {
+.profileDisplay {
     display: flex;
     align-items: center;
-  }
+}
   
-  #profileDisplay img {
-    margin-right: 10px;
-    border-radius: 50%;
-  }
+.profileDisplay img {
+  margin-right: 10px;
+  border-radius: 50%;
+}
