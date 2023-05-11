@@ -8,6 +8,7 @@ const app = express();
 const session = require("express-session");
 const MongoStore = require("connect-mongo");
 const bcrypt = require("bcrypt");
+const saltRounds = 12;
 
 const port = 3000;
 
@@ -134,7 +135,7 @@ app.post('/submitUser', async (req,res) => {
 
       var hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    await userCollection.insertOne({username: username, password: hashedPassword, user_type: 'user'});
+    await userCollection.insertOne({username: username, password: hashedPassword,email: email, user_type: 'user', pfp: null, playlists: []});
     console.log("Inserted user");
 
       res.redirect('/welcome');
@@ -145,7 +146,7 @@ app.get('/welcome', (req,res) => {
   
   if (req.session.authenticated) {
 
-      res.render("members", {user: username});
+      res.render("welcome", {user: username});
 
   }
   else {
@@ -153,6 +154,13 @@ app.get('/welcome', (req,res) => {
   }
 });
 
+app.get('/logout', (req,res) => {
+	req.session.destroy();
+    var sessionState = false;
+    var username = "";
+
+    res.render("index", {isLoggedIn: sessionState, userName: username});
+});
 
 
 app.use(express.static(__dirname + "/public"));
