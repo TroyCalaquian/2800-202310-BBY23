@@ -68,13 +68,15 @@ app.get("/pickTags", (req, res) => {
   res.render("pickTags" , {tags: tags});
 });
 
+
   app.post("/updateTags", (req, res) => {
     const tags = req.body.tags; // Array of selected tags
     const actions = req.body.actions; // Array of corresponding actions for each tag
 
+    // TODO: Add check for whether the user already inputted a playlist
     if (typeof tags === 'undefined' || tags.length == 0) {
       // No tags were selected
-      res.redirect("/pickTags");
+      res.redirect("/confirmTags");
       return;
     }
   
@@ -95,13 +97,13 @@ app.get("/pickTags", (req, res) => {
     }
   
     // Redirect back to the /pickTags page or any other desired page
-    res.redirect("/pickTags");
+    res.redirect("/confirmTags");
   });
   
 
 
 app.get("/confirmTags", (req, res) => {
-  res.render("confirmTags");
+  res.render("confirmTags", {pickedTags: pickedTags, blacklistedTags: blacklistedTags});
 });
 
 app.post("/editUsername", async (req, res) => {
