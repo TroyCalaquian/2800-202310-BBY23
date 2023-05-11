@@ -1,0 +1,9 @@
+#profileDisplay {
+    display: flex;
+    align-items: center;
+  }
+  
+  #profileDisplay img {
+    margin-right: 10px;
+    border-radius: 50%;
+  }
