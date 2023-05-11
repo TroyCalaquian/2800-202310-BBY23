@@ -50,6 +50,46 @@ app.use(
   })
 );
 
+app.post("/editUsername", async (req, res) => {
+  var username = req.body.username;
+  const schema = Joi.object({
+    username: Joi.string().min(3).max(30).required(),
+  });
+
+  const validationResult = schema.validate({ username: username });
+  if (validationResult.error) {
+    console.log(validationResult.error);
+    // Possibly render an error page? Or popup?
+    return;
+  }
+
+  await userCollection.updateOne({username: req.session.username}, {$set: {username: username}});
+  res.redirect("/profile");
+});
+
+app.post("/editPhoto", async (req, res) => {
+  if (!req.file || !req.file.mimetype.startsWith("image/")) {
+    res.status(400).send("Please select a valid image file.");
+    return;
+  }
+
+  try {
+    const photoData = req.file.buffer; // Access the photo buffer directly
+
+    // Update the photo field for the current user in the users collection
+    await userCollection.updateOne(
+      { username: req.session.username },
+      { $set: { photo: photoData } }
+    );
+
+    res.redirect("/profile");
+  } catch (error) {
+    console.error("Failed to update photo:", error);
+    res.status(500).send("Failed to update photo.");
+  }
+});
+
+
 app.use(express.static(__dirname + "/public"));
 
 app.get("*", (req, res) => {
