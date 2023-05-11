@@ -123,15 +123,17 @@ app.post('/submitUser', async (req,res) => {
     var username = req.body.username;
     var email = req.body.email;
     var password = req.body.password;
+    var securityAnswer = req.body.answer;
 
     const schema = Joi.object(
       {
         username: Joi.string().alphanum().max(20).required(),
         email: Joi.string().email().required(),
-        password: Joi.string().max(20).required()
+        password: Joi.string().max(20).required(),
+        securityAnswer: Joi.string().alphanum().max(20).required(),
       });
 
-    const validationResult = schema.validate({username, email, password});
+    const validationResult = schema.validate({username, email, password, securityAnswer});
     if (validationResult.error != null) {
       console.log(validationResult.error);
         var error = validationResult.error.details[0].message;
@@ -141,14 +143,13 @@ app.post('/submitUser', async (req,res) => {
 
       var hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    await userCollection.insertOne({username: username, password: hashedPassword,email: email, user_type: 'user', pfp: null, playlists: []});
+    await userCollection.insertOne({username: username, password: hashedPassword,email: email, Security_Question_Answer: securityAnswer,user_type: 'user', pfp: null, playlists: []});
     console.log("Inserted user");
 
       res.redirect('/welcome');
 });
 
 app.get('/welcome', (req,res) => {
-  // var username = req.session.name;
   
   if (req.session.authenticated) {
 
@@ -162,21 +163,53 @@ app.get('/welcome', (req,res) => {
 
 app.get('/changePassword', (req,res) =>{
       var sessionState = req.session.authenticated;
-      res.render("resetPassword", {sessionState: sessionState});
+      if(sessionState){
+        res.render("resetPassword", {sessionState: sessionState});
+      } else {
+        res.render("securityQuestion");
+      }
 
 });
 
 app.post('/changingPassword', async (req,res) => {
+  
     var newpassword = req.body.password;
     var useremail = req.session.email;
     console.log(useremail);
-    let currentUser = await userCollection.findOne(useremail);
+    let currentUser = await userCollection.findOne({email: useremail});
     console.log("hello");
     console.log(currentUser);
     console.log(currentUser.email);
-    console.log(req.session.password);
+    console.log(currentUser.password);
+    var hashedPassword = await bcrypt.hash(newpassword, saltRounds);
+    await userCollection.updateOne({email: useremail}, {$set: {password: hashedPassword}});
+    console.log("=========NEW PASS=========");
+    console.log(newpassword);
+    console.log(hashedPassword);
+    
+    if (req.session.authenticated){
+      console.log(currentUser.username + "going to welcome");
+      res.render("welcome", {user: currentUser.username});
+    }else{
+      res.render("login");
+    }
 
 
+});
+
+app.post('/securityQuestion', async (req,res) => {
+  var useremail = req.body.email;
+  req.session.email = useremail;
+  var securityans = req.body.answer;
+  let currentUser = await userCollection.findOne({email: useremail});
+  if(!currentUser){
+    res.render("securityQuestion");
+  }else{
+    if(currentUser.email == useremail && currentUser.Security_Question_Answer == securityans){
+      res.render("resetPassword");
+    }
+  }
+  
 });
 
 app.get('/logout', (req,res) => {
