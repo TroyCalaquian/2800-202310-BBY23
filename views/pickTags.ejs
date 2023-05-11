@@ -1,0 +1,26 @@
+<%- include('./templates/htmlOpen') %>
+<!-- Stylesheets added here -->
+
+<%- include('./templates/header') %>
+<form method="post" action="/updateTags">
+  <ul>
+    <% for (let i = 0; i < tags.length; i++) { %>
+      <li>
+        <input type="checkbox" name="tags" value="<%= tags[i] %>" id="tag<%= i %>">
+        <label for="tag<%= i %>"><%= tags[i] %></label>
+        <select name="action">
+          <option value="pick">Add Tag</option>
+          <option value="blacklist">Blacklist</option>
+        </select>
+      </li>
+    <% } %>
+  </ul>
+  <button type="submit">Submit</button>
+</form>
+
+
+<%- include('./templates/footer') %>
+
+<!-- js scripts added here -->
+
+<%- include('./templates/htmlClose') %>

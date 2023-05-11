@@ -14,6 +14,8 @@ const port = 3000;
 const Joi = require("joi");
 
 const expireTime = 60 * 60 * 1000;
+var pickedTags = [];
+var blacklistedTags = [];
 
 /* secret information section */
 const mongodb_host = process.env.MONGODB_HOST;
@@ -49,6 +51,60 @@ app.use(
     resave: true,
   })
 );
+
+app.get("/home", (req, res) => {
+  res.render("index");
+});
+
+app.get("/profile", (req, res) => {
+  res.render("profile");
+});
+
+app.get("/pickTags", (req, res) => {
+  pickedTags = [];
+  blacklistedTags = [];
+  // These have to be strings
+  var tags = ["test1", "test2"];
+  res.render("pickTags" , {tags: tags});
+});
+
+// Handle POST request to the /pickTags route
+app.post("/updateTags", (req, res) => {
+  const selectedTags = req.body.tags; // Array of selected tags
+  const actions = req.body.action; // Array of corresponding actions for each tag
+
+  if (typeof selectedTags === 'undefined' || selectedTags.length == 0) {
+    // No tags were selected
+    res.redirect("/pickTags");
+    return;
+  }
+  
+  for (let i = 0; i < selectedTags.length; i++) {
+    const tag = selectedTags[i];
+    const action = actions[i];
+
+    // Add or blacklist the tag based on the selected action
+    if (action === "pick") {
+      // Add the tag to the pickedTags array
+      pickedTags.push(tag);
+      // Remove the tag from the blacklistedTags array (if it exists)
+      blacklistedTags = blacklistedTags.filter((blacklistedTag) => blacklistedTag !== tag);
+    } else if (action === "blacklist") {
+      // Add the tag to the blacklistedTags array
+      blacklistedTags.push(tag);
+      // Remove the tag from the pickedTags array (if it exists)
+      pickedTags = pickedTags.filter((pickedTag) => pickedTag !== tag);
+    }
+  }
+
+  // Redirect back to the /pickTags page
+  res.redirect("/pickTags");
+});
+
+
+app.get("/confirmTags", (req, res) => {
+  res.render("confirmTags");
+});
 
 app.post("/editUsername", async (req, res) => {
   var username = req.body.username;
@@ -91,14 +147,6 @@ app.post("/editPhoto", async (req, res) => {
 
 
 app.use(express.static(__dirname + "/public"));
-
-app.get("/home", (req, res) => {
-  res.render("index");
-});
-
-app.get("/profile", (req, res) => {
-  res.render("profile");
-});
 
 app.get("*", (req, res) => {
   res.status(404);
