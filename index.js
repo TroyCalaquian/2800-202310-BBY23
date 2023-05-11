@@ -68,38 +68,36 @@ app.get("/pickTags", (req, res) => {
   res.render("pickTags" , {tags: tags});
 });
 
-// Handle POST request to the /pickTags route
-app.post("/updateTags", (req, res) => {
-  const selectedTags = req.body.tags; // Array of selected tags
-  const actions = req.body.action; // Array of corresponding actions for each tag
+  app.post("/updateTags", (req, res) => {
+    const tags = req.body.tags; // Array of selected tags
+    const actions = req.body.actions; // Array of corresponding actions for each tag
 
-  if (typeof selectedTags === 'undefined' || selectedTags.length == 0) {
-    // No tags were selected
-    res.redirect("/pickTags");
-    return;
-  }
-  
-  for (let i = 0; i < selectedTags.length; i++) {
-    const tag = selectedTags[i];
-    const action = actions[i];
-
-    // Add or blacklist the tag based on the selected action
-    if (action === "pick") {
-      // Add the tag to the pickedTags array
-      pickedTags.push(tag);
-      // Remove the tag from the blacklistedTags array (if it exists)
-      blacklistedTags = blacklistedTags.filter((blacklistedTag) => blacklistedTag !== tag);
-    } else if (action === "blacklist") {
-      // Add the tag to the blacklistedTags array
-      blacklistedTags.push(tag);
-      // Remove the tag from the pickedTags array (if it exists)
-      pickedTags = pickedTags.filter((pickedTag) => pickedTag !== tag);
+    if (typeof tags === 'undefined' || tags.length == 0) {
+      // No tags were selected
+      res.redirect("/pickTags");
+      return;
     }
-  }
-
-  // Redirect back to the /pickTags page
-  res.redirect("/pickTags");
-});
+  
+    for (let i = 0; i < tags.length; i++) {
+      const tag = tags[i];
+      const action = actions[i];
+  
+      // Handle the selected action for each tag
+      if (action === "add") {
+        pickedTags.push(tag); // Add the tag to the pickedTags array
+      } else if (action === "blacklist") {
+        blacklistedTags.push(tag); // Add the tag to the blacklistedTags array
+      } else if (action === "blank") {
+        // Remove the tag from both arrays, if it exists
+        pickedTags = pickedTags.filter((pickedTag) => pickedTag !== tag);
+        blacklistedTags = blacklistedTags.filter((blacklistedTag) => blacklistedTag !== tag);
+      }
+    }
+  
+    // Redirect back to the /pickTags page or any other desired page
+    res.redirect("/pickTags");
+  });
+  
 
 
 app.get("/confirmTags", (req, res) => {

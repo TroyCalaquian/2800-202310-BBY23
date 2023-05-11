@@ -6,17 +6,19 @@
   <ul>
     <% for (let i = 0; i < tags.length; i++) { %>
       <li>
-        <input type="checkbox" name="tags" value="<%= tags[i] %>" id="tag<%= i %>">
         <label for="tag<%= i %>"><%= tags[i] %></label>
-        <select name="action">
-          <option value="pick">Add Tag</option>
+        <select name="actions">
+          <option value=""></option>
+          <option value="add">Add</option>
           <option value="blacklist">Blacklist</option>
         </select>
+        <input type="hidden" name="tags" value="<%= tags[i] %>">
       </li>
     <% } %>
   </ul>
   <button type="submit">Submit</button>
 </form>
+
 
 
 <%- include('./templates/footer') %>
