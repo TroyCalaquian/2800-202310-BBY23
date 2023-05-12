@@ -318,6 +318,7 @@ app.post("/editPhoto", async (req, res) => {
     console.error("Failed to update photo:", error);
     res.status(500).send("Failed to update photo.");
   }
+});
 
 
 
