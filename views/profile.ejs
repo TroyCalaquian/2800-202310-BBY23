@@ -1,0 +1,32 @@
+<%- include('./templates/htmlOpen') %>
+<!-- Stylesheets added here -->
+        <link rel="stylesheet" href="../styling/profilePageStylesheet.css">
+
+<%- include('./templates/header') %>
+
+<!-- These values to be converted to read from database. -->
+<% const username = "currentUser" %>
+<% const profileLink = "https://dummyimage.com/200x200/000/fff" %>
+<% const songs = ['song1', 'song2', 'song3']; %>
+
+<!-- Assembly of pic & username -->
+<div class="profileDisplay d-flex justify-content-center">
+    <img id="profilePic" src=<%- profileLink %> alt="Profile Picture">
+    <h1 id="username"><%- username %></h1>
+</div>
+
+<!-- This user's playlists -->
+<br><div id="userPlaylists">
+    <h3><%- username %>'s Playlists</h3>
+    <ul class="list-group">
+        <% songs.forEach(function(song) { %>
+            <li class="list-group-item"><%= song %></li>
+        <% }); %>
+    </ul>
+</div>
+
+<%- include('./templates/footer') %>
+
+<!-- js scripts added here -->
+
+<%- include('./templates/htmlClose') %>

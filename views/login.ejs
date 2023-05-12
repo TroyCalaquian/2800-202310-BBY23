@@ -1,0 +1,23 @@
+<%- include('./templates/htmlOpen') %>
+
+<!-- Stylesheets added here -->
+
+<%- include('./templates/header') %>
+
+&nbsp;<br><h1>Log In</h1>
+<form action='/loggingin' method='post'>
+  <input name='email' type='text' placeholder='email'>
+  <input name='password' type='password' placeholder='password'>
+  <button onclick="location.href='/home'"></buttononclick>Submit</button>
+</form> 
+<br><br>
+<div class="d-flex justify-content-center">
+  <h4>or &nbsp;<br></h4>
+  <button onclick="location.href='/changePassword'">Change Password</button>
+</div>
+
+<%- include('./templates/footer') %>
+
+<!-- JS scripts added here -->
+
+<%- include('./templates/htmlClose') %>

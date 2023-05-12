@@ -1,0 +1,20 @@
+/* The * selector will impact ALL, so be cautious */
+* {
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+
+.footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+
+.addPadding {
+    padding-left: 5vw;
+    padding-right: 5vw;
+}
+
+.centered {
+    justify-content: center;
+    text-align: center;
+}
