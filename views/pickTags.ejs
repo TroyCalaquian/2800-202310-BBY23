@@ -1,0 +1,30 @@
+<%- include('./templates/htmlOpen') %>
+<!-- Stylesheets added here -->
+
+<%- include('./templates/header') %>
+
+<h1>Choose your tags</h1>
+<form method="post" action="/updateTags">
+  <ul>
+    <% for (let i = 0; i < tags.length; i++) { %>
+      <li>
+        <label for="tag<%= i %>"><%= tags[i] %></label>
+        <select name="actions">
+          <option value=""></option>
+          <option value="add">Add</option>
+          <option value="blacklist">Blacklist</option>
+        </select>
+        <input type="hidden" name="tags" value="<%= tags[i] %>">
+      </li>
+    <% } %>
+  </ul>
+  <button type="submit">Submit</button>
+</form>
+
+
+
+<%- include('./templates/footer') %>
+
+<!-- js scripts added here -->
+
+<%- include('./templates/htmlClose') %>
