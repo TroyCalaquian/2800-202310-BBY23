@@ -160,25 +160,6 @@ app.get('/welcome', (req,res) => {
   }
 });
 
-app.get('/changePassword', (req,res) =>{
-      var sessionState = req.session.authenticated;
-      res.render("resetPassword", {sessionState: sessionState});
-
-});
-
-app.post('/changingPassword', async (req,res) => {
-    var newpassword = req.body.password;
-    var useremail = req.session.email;
-    console.log(useremail);
-    let currentUser = await userCollection.findOne(useremail);
-    console.log("hello");
-    console.log(currentUser);
-    console.log(currentUser.email);
-    console.log(req.session.password);
-
-
-});
-
 app.get('/logout', (req,res) => {
 	req.session.destroy();
     var sessionState = false;
