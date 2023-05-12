@@ -285,6 +285,10 @@ app.get("/results", (req, res) => {
   res.render("results");
 });
 
+app.get("/addMusic", (req, res) => {
+  res.render("addMusic");
+});
+
 app.post("/editUsername", async (req, res) => {
   var username = req.body.username;
   const schema = Joi.object({

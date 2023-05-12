@@ -1,6 +1,22 @@
-<form action='/securityQuestion' method='post'>
-    Enter your email and your security answer for your favorite animal.
-    <input name='email' type='email' placeholder='email'>
-    <input name='answer' type='text' placeholder='animal'>
-   <button>Submit</button>
-</form>
+<%- include('./templates/htmlOpen') %>
+
+<!-- Stylesheets added here -->
+
+<%- include('./templates/header') %>
+
+<br>
+<div class="centered">
+    <form action='/securityQuestion' method='post'>
+        <h2>Reset password</h2>
+        <h4>Enter email & answer your security question.</h4>
+        <input name='email' type='email' placeholder='email'>
+        <input name='answer' type='text' placeholder='animal'>
+    <button>Submit</button>
+    </form>
+</div>
+
+<%- include('./templates/footer') %>
+
+<!-- JS scripts added here -->
+
+<%- include('./templates/htmlClose') %>
