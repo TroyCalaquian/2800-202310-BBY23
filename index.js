@@ -278,7 +278,11 @@ app.get("/confirmTags", (req, res) => {
 });
 
 app.post("/confirmChoices", async (req, res) => {
-  res.redirect("/home");
+  res.redirect("/results");
+});
+
+app.get("/results", (req, res) => {
+  res.render("results");
 });
 
 app.post("/editUsername", async (req, res) => {
@@ -318,6 +322,7 @@ app.post("/editPhoto", async (req, res) => {
     console.error("Failed to update photo:", error);
     res.status(500).send("Failed to update photo.");
   }
+});
 
 
 
