@@ -56,7 +56,7 @@ app.get('/', (req,res) => {
     var sessionState = req.session.authenticated;
     var username = req.session.username;
 
-    res.render("index", {isLoggedIn: sessionState, userName: username});
+    res.render("welcome", {isLoggedIn: sessionState, userName: username});
 });
 
 app.get('/login', (req,res) => {
@@ -217,7 +217,7 @@ app.get('/logout', (req,res) => {
     var sessionState = false;
     var username = "";
 
-    res.render("index", {isLoggedIn: sessionState, userName: username});
+    res.render("welcome", {isLoggedIn: sessionState, userName: username});
 });
 
 
