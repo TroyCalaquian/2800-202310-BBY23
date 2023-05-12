@@ -57,7 +57,7 @@ app.use(
 
 app.get('/', (req,res) => {
     var sessionState = req.session.authenticated;
-    var username = req.session.username;
+    var username = req.session.name;
 
     res.render("welcome", {isLoggedIn: sessionState, userName: username});
 });
@@ -92,7 +92,7 @@ app.post('/loggingin', async (req,res) => {
       req.session.authenticated = true;
       req.session.email = email;
       req.session.cookie.maxAge = expireTime;
-      var user = await userCollection.findOne({ email });
+      var user = await userCollection.findOne({ email: email });
         req.session.name = user.username;
         req.session.user = user;
       // console.log(user)
@@ -156,7 +156,7 @@ app.get('/welcome', (req,res) => {
   
   if (req.session.authenticated) {
 
-      res.render("welcome", {user: req.session.name});
+      res.render("welcome", {isLoggedIn: req.session.authenticated, userName: req.session.name});
 
   }
   else {
