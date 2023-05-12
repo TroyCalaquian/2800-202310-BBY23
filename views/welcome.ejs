@@ -1,10 +1,8 @@
-Welcome, <%= user %>!
-<br>
-<div class="row mb-3 text-center">
-    <img class="col-6 col-md-4 themed-grid-col" src="/lol.jpg" alt="whateva"></img>
-    <img class="col-6 col-md-4 themed-grid-col" src="/lol1.jpg" alt="whateva"></img>
-    <img class="col-6 col-md-4 themed-grid-col" src="/lol2.jpg" alt="whateva"></img>
-  </div>
-<br>
-<button onclick="location.href='/logout'">Logout</button>
+<% if (!isLoggedIn) { %>
+  <button onclick="location.href='/signup'">Sign Up</button>
+  <button onclick="location.href='/login'">Login</button>
+<% } else { %>
+  <h1>Welcome, <%= userName %>!</h1>
+  <button onclick="location.href='/logout'">Logout</button>
 <button onclick="location.href='/changePassword'">Change Password</button>
+<% } %>

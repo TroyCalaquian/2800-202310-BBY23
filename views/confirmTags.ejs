@@ -1,0 +1,44 @@
+<%- include('./templates/htmlOpen') %>
+<!-- Stylesheets added here -->
+
+<%- include('./templates/header') %>
+
+<h1>You okay with these settings?</h1>
+
+<% if (pickedTags.length !== 0) { %>
+  <h4>Tags</h4>
+  <ul>
+    <% for (let i = 0; i < pickedTags.length; i++) { %>
+      <li>
+        <label for="tag<%= i %>"><%= pickedTags[i] %></label>
+        <input type="hidden" name="tags" value="<%= pickedTags[i] %>">
+      </li>
+    <% } %>
+  </ul>
+<% } %>
+<% if (blacklistedTags.length !== 0) { %>
+  <h4>Blacklisted</h4>
+  <ul>
+    <% for (let i = 0; i < blacklistedTags.length; i++) { %>
+      <li>
+        <label for="tag<%= i %>"><%= blacklistedTags[i] %></label>
+        <input type="hidden" name="tags" value="<%= blacklistedTags[i] %>">
+      </li>
+    <% } %>
+  </ul>
+<% } %>
+<form method="post" action="/confirmChoices">
+  <button type="submit">Confirm Choices</button>
+</form>
+
+<form method="get" action="/pickTags">
+  <button type="submit">Go Back</button>
+</form>
+
+
+
+<%- include('./templates/footer') %>
+
+<!-- js scripts added here -->
+
+<%- include('./templates/htmlClose') %>
