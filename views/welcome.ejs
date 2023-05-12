@@ -1,0 +1,8 @@
+<% if (!isLoggedIn) { %>
+  <button onclick="location.href='/signup'">Sign Up</button>
+  <button onclick="location.href='/login'">Login</button>
+<% } else { %>
+  <h1>Welcome, <%= userName %>!</h1>
+  <button onclick="location.href='/logout'">Logout</button>
+<button onclick="location.href='/changePassword'">Change Password</button>
+<% } %>

@@ -8,6 +8,7 @@ const app = express();
 const session = require("express-session");
 const MongoStore = require("connect-mongo");
 const bcrypt = require("bcrypt");
+const saltRounds = 12;
 
 const port = 3000;
 
@@ -30,6 +31,7 @@ const node_session_secret = process.env.NODE_SESSION_SECRET;
 var { database } = include("databaseConnection");
 
 const userCollection = database.db(mongodb_database).collection("users");
+const playlistCollection = database.db(mongodb_database).collection("playlists");
 
 app.set("view engine", "ejs");
 
@@ -52,6 +54,175 @@ app.use(
   })
 );
 
+
+app.get('/', (req,res) => {
+    var sessionState = req.session.authenticated;
+    var username = req.session.username;
+
+    res.render("welcome", {isLoggedIn: sessionState, userName: username});
+});
+
+app.get('/login', (req,res) => {
+    res.render("login");
+});
+
+app.post('/loggingin', async (req,res) => {
+    var email = req.body.email;
+    var password = req.body.password;
+
+    const schema = Joi.string().email().required();
+    const validationResult = schema.validate(email);
+    
+    if (validationResult.error != null) {
+      console.log(validationResult.error);
+      res.redirect("/login");
+      return;
+    }
+
+    const result = await userCollection.find({email: email}).project({email: 1, password: 1, _id: 1}).toArray();
+
+    console.log(result);
+    if (result.length != 1) {
+      console.log("user not found");
+      res.redirect("/login");
+      return;
+    }
+    if (await bcrypt.compare(password, result[0].password)) {
+      console.log("correct password");
+      req.session.authenticated = true;
+      req.session.email = email;
+      req.session.cookie.maxAge = expireTime;
+      var user = await userCollection.findOne({ email });
+        req.session.name = user.username;
+        req.session.user = user;
+      // console.log(user)
+      // console.log("###########################")
+      // console.log(req.session.email)
+      res.redirect('/loggedIn');
+      return;
+    }
+    else {
+        console.log("incorrect password");
+        res.render("loginfail");
+        return;
+    }
+});
+
+app.get('/loggedin', (req,res) => {
+    if (!req.session.authenticated) {
+        res.redirect('/login');
+    }
+    res.redirect('/welcome');
+    
+});
+
+app.get('/signup', (req,res) => {
+   res.render("signup");
+});
+
+// After signup, posts to this 
+
+app.post('/submitUser', async (req,res) => {
+    var username = req.body.username;
+    var email = req.body.email;
+    var password = req.body.password;
+    var securityAnswer = req.body.answer;
+
+    const schema = Joi.object(
+      {
+        username: Joi.string().alphanum().max(20).required(),
+        email: Joi.string().email().required(),
+        password: Joi.string().max(20).required(),
+        securityAnswer: Joi.string().alphanum().max(20).required(),
+      });
+
+    const validationResult = schema.validate({username, email, password, securityAnswer});
+    if (validationResult.error != null) {
+      console.log(validationResult.error);
+        var error = validationResult.error.details[0].message;
+        res.render("signupfail", {theError: error});
+      return;
+    }
+
+      var hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    await userCollection.insertOne({username: username, password: hashedPassword,email: email, Security_Question_Answer: securityAnswer,user_type: 'user', pfp: null, playlists: []});
+    console.log("Inserted user");
+
+      res.redirect('/welcome');
+});
+
+app.get('/welcome', (req,res) => {
+  
+  if (req.session.authenticated) {
+
+      res.render("welcome", {user: req.session.name});
+
+  }
+  else {
+      res.redirect('/login');
+  }
+});
+
+app.get('/changePassword', (req,res) =>{
+      var sessionState = req.session.authenticated;
+      if(sessionState){
+        res.render("resetPassword", {sessionState: sessionState});
+      } else {
+        res.render("securityQuestion");
+      }
+
+});
+
+app.post('/changingPassword', async (req,res) => {
+  
+    var newpassword = req.body.password;
+    var useremail = req.session.email;
+    console.log(useremail);
+    let currentUser = await userCollection.findOne({email: useremail});
+    console.log("hello");
+    console.log(currentUser);
+    console.log(currentUser.email);
+    console.log(currentUser.password);
+    var hashedPassword = await bcrypt.hash(newpassword, saltRounds);
+    await userCollection.updateOne({email: useremail}, {$set: {password: hashedPassword}});
+    console.log("=========NEW PASS=========");
+    console.log(newpassword);
+    console.log(hashedPassword);
+    
+    if (req.session.authenticated){
+      console.log(currentUser.username + "going to welcome");
+      res.render("welcome", {user: currentUser.username});
+    }else{
+      res.render("login");
+    }
+
+
+});
+
+app.post('/securityQuestion', async (req,res) => {
+  var useremail = req.body.email;
+  req.session.email = useremail;
+  var securityans = req.body.answer;
+  let currentUser = await userCollection.findOne({email: useremail});
+  if(!currentUser){
+    res.render("securityQuestion");
+  }else{
+    if(currentUser.email == useremail && currentUser.Security_Question_Answer == securityans){
+      res.render("resetPassword");
+    }
+  }
+  
+});
+
+app.get('/logout', (req,res) => {
+	req.session.destroy();
+    var sessionState = false;
+    var username = "";
+
+    res.render("welcome", {isLoggedIn: sessionState, userName: username});
+});
+  
 app.get("/home", (req, res) => {
   res.render("index");
 });
@@ -147,7 +318,8 @@ app.post("/editPhoto", async (req, res) => {
     console.error("Failed to update photo:", error);
     res.status(500).send("Failed to update photo.");
   }
-});
+
+
 
 
 app.use(express.static(__dirname + "/public"));
