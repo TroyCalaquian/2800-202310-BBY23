@@ -1,6 +1,18 @@
+<%- include('./templates/htmlOpen') %>
+
+<!-- Stylesheets added here -->
+
+<%- include('./templates/header') %>
+
 <form action='/securityQuestion' method='post'>
     Enter your email and your security answer for your favorite animal.
     <input name='email' type='email' placeholder='email'>
     <input name='answer' type='text' placeholder='animal'>
    <button>Submit</button>
 </form>
+
+<%- include('./templates/footer') %>
+
+<!-- JS scripts added here -->
+
+<%- include('./templates/htmlClose') %>

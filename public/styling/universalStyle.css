@@ -8,3 +8,13 @@
     bottom: 0;
     width: 100%;
 }
+
+.addPadding {
+    padding-left: 5vw;
+    padding-right: 5vw;
+}
+
+.centered {
+    justify-content: center;
+    text-align: center;
+}

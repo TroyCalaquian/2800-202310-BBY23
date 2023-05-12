@@ -1,8 +1,24 @@
-<% if (!isLoggedIn) { %>
-  <button onclick="location.href='/signup'">Sign Up</button>
-  <button onclick="location.href='/login'">Login</button>
-<% } else { %>
-  <h1>Welcome, <%= userName %>!</h1>
-  <button onclick="location.href='/logout'">Logout</button>
+<%- include('./templates/htmlOpen') %>
+
+<!-- Stylesheets added here -->
+
+<%- include('./templates/header') %>
+
+<br>
+<div class="centered">
+  <% if (!isLoggedIn) { %>
+    <h2>Please signup or login</h2>
+    <button onclick="location.href='/signup'">Sign Up</button>
+    <button onclick="location.href='/login'">Login</button>
+  <% } else { %>
+    <h1>Welcome <%- username %>!<br>Please select one<!--<%= userName %>--></h1>
+    <button onclick="location.href='/home'">Enter!</button>
+    <button onclick="location.href='/logout'">Logout</button>
   <button onclick="location.href='/changePassword'">Change Password</button>
-<% } %>
+  <% } %>
+</div>
+<%- include('./templates/footer') %>
+
+<!-- JS scripts added here -->
+
+<%- include('./templates/htmlClose') %>
