@@ -1,0 +1,29 @@
+<%- include('./templates/htmlOpen') %>
+
+<!-- Stylesheets added here -->
+
+<%- include('./templates/header') %>
+
+<br>
+<div class="centered">
+    <h2>Add Music with Spotify</h2>
+    <div class="input-group mb-3">
+    <div class="input-group-prepend">
+        <span class="input-group-text" id="basic-addon3">Go!</span>
+    </div>
+    <input type="text" class="form-control" id="basic-url" placeholder="Paste Playlist Link" aria-describedby="basic-addon3">
+    </div>
+    
+    <h2>or</h2>
+
+    <h3>Find songs using tags</h3>
+    <a href="/pickTags">
+        <button type="button" class="btn btn-secondary btn-lg">Lets go!</button>
+    </a>
+</div>
+
+<%- include('./templates/footer') %>
+
+<!-- JS scripts added here -->
+
+<%- include('./templates/htmlClose') %>

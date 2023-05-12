@@ -1,19 +1,21 @@
-<form action='/submitUser' method='post'>
-    <input name='username' type='text' placeholder='username'>
-    <input name='email' type='email' placeholder='email'>
-    <input name='password' type='password' placeholder='password'>
-    <input name='answer' type='text' placeholder='favorite animal'>
-
-   <button>Submit</button>
-</form>
-
 <%- include('./templates/htmlOpen') %>
 
 <!-- Stylesheets added here -->
 
 <%- include('./templates/header') %>
 
-<!-- Main content here -->
+<br>
+<div class="centered">
+    <h2>Sign Up</h2>
+    <form action='/submitUser' method='post'>
+        <input name='username' type='text' placeholder='username'>
+        <input name='email' type='email' placeholder='email'>
+        <input name='password' type='password' placeholder='password'>
+        <input name='answer' type='text' placeholder='favorite animal'>
+
+    <br><button>Submit</button>
+    </form>
+</div>
 
 <%- include('./templates/footer') %>
 
