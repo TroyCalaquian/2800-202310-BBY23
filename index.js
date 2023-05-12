@@ -15,8 +15,6 @@ const port = 3000;
 const Joi = require("joi");
 
 const expireTime = 60 * 60 * 1000;
-var pickedTags = [];
-var blacklistedTags = [];
 
 /* secret information section */
 const mongodb_host = process.env.MONGODB_HOST;
@@ -54,12 +52,11 @@ app.use(
   })
 );
 
-
 app.get('/', (req,res) => {
     var sessionState = req.session.authenticated;
     var username = req.session.username;
 
-    res.render("welcome", {isLoggedIn: sessionState, userName: username});
+    res.render("index", {isLoggedIn: sessionState, userName: username});
 });
 
 app.get('/login', (req,res) => {
@@ -126,17 +123,15 @@ app.post('/submitUser', async (req,res) => {
     var username = req.body.username;
     var email = req.body.email;
     var password = req.body.password;
-    var securityAnswer = req.body.answer;
 
     const schema = Joi.object(
       {
         username: Joi.string().alphanum().max(20).required(),
         email: Joi.string().email().required(),
-        password: Joi.string().max(20).required(),
-        securityAnswer: Joi.string().alphanum().max(20).required(),
+        password: Joi.string().max(20).required()
       });
 
-    const validationResult = schema.validate({username, email, password, securityAnswer});
+    const validationResult = schema.validate({username, email, password});
     if (validationResult.error != null) {
       console.log(validationResult.error);
         var error = validationResult.error.details[0].message;
@@ -146,13 +141,14 @@ app.post('/submitUser', async (req,res) => {
 
       var hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    await userCollection.insertOne({username: username, password: hashedPassword,email: email, Security_Question_Answer: securityAnswer,user_type: 'user', pfp: null, playlists: []});
+    await userCollection.insertOne({username: username, password: hashedPassword,email: email, user_type: 'user', pfp: null, playlists: []});
     console.log("Inserted user");
 
       res.redirect('/welcome');
 });
 
 app.get('/welcome', (req,res) => {
+  // var username = req.session.name;
   
   if (req.session.authenticated) {
 
@@ -164,162 +160,13 @@ app.get('/welcome', (req,res) => {
   }
 });
 
-app.get('/changePassword', (req,res) =>{
-      var sessionState = req.session.authenticated;
-      if(sessionState){
-        res.render("resetPassword", {sessionState: sessionState});
-      } else {
-        res.render("securityQuestion");
-      }
-
-});
-
-app.post('/changingPassword', async (req,res) => {
-  
-    var newpassword = req.body.password;
-    var useremail = req.session.email;
-    console.log(useremail);
-    let currentUser = await userCollection.findOne({email: useremail});
-    console.log("hello");
-    console.log(currentUser);
-    console.log(currentUser.email);
-    console.log(currentUser.password);
-    var hashedPassword = await bcrypt.hash(newpassword, saltRounds);
-    await userCollection.updateOne({email: useremail}, {$set: {password: hashedPassword}});
-    console.log("=========NEW PASS=========");
-    console.log(newpassword);
-    console.log(hashedPassword);
-    
-    if (req.session.authenticated){
-      console.log(currentUser.username + "going to welcome");
-      res.render("welcome", {user: currentUser.username});
-    }else{
-      res.render("login");
-    }
-
-
-});
-
-app.post('/securityQuestion', async (req,res) => {
-  var useremail = req.body.email;
-  req.session.email = useremail;
-  var securityans = req.body.answer;
-  let currentUser = await userCollection.findOne({email: useremail});
-  if(!currentUser){
-    res.render("securityQuestion");
-  }else{
-    if(currentUser.email == useremail && currentUser.Security_Question_Answer == securityans){
-      res.render("resetPassword");
-    }
-  }
-  
-});
-
 app.get('/logout', (req,res) => {
 	req.session.destroy();
     var sessionState = false;
     var username = "";
 
-    res.render("welcome", {isLoggedIn: sessionState, userName: username});
+    res.render("index", {isLoggedIn: sessionState, userName: username});
 });
-  
-app.get("/home", (req, res) => {
-  res.render("index");
-});
-
-app.get("/profile", (req, res) => {
-  res.render("profile");
-});
-
-app.get("/pickTags", (req, res) => {
-  pickedTags = [];
-  blacklistedTags = [];
-  // These have to be strings
-  var tags = ["test1", "test2"];
-  res.render("pickTags" , {tags: tags});
-});
-
-
-  app.post("/updateTags", (req, res) => {
-    const tags = req.body.tags; // Array of selected tags
-    const actions = req.body.actions; // Array of corresponding actions for each tag
-
-    // TODO: Add check for whether the user already inputted a playlist
-    if (typeof tags === 'undefined' || tags.length == 0) {
-      // No tags were selected
-      res.redirect("/confirmTags");
-      return;
-    }
-  
-    for (let i = 0; i < tags.length; i++) {
-      const tag = tags[i];
-      const action = actions[i];
-  
-      // Handle the selected action for each tag
-      if (action === "add") {
-        pickedTags.push(tag); // Add the tag to the pickedTags array
-      } else if (action === "blacklist") {
-        blacklistedTags.push(tag); // Add the tag to the blacklistedTags array
-      } else if (action === "blank") {
-        // Remove the tag from both arrays, if it exists
-        pickedTags = pickedTags.filter((pickedTag) => pickedTag !== tag);
-        blacklistedTags = blacklistedTags.filter((blacklistedTag) => blacklistedTag !== tag);
-      }
-    }
-  
-    // Redirect back to the /pickTags page or any other desired page
-    res.redirect("/confirmTags");
-  });
-  
-
-
-app.get("/confirmTags", (req, res) => {
-  res.render("confirmTags", {pickedTags: pickedTags, blacklistedTags: blacklistedTags});
-});
-
-app.post("/confirmChoices", async (req, res) => {
-  res.redirect("/home");
-});
-
-app.post("/editUsername", async (req, res) => {
-  var username = req.body.username;
-  const schema = Joi.object({
-    username: Joi.string().min(3).max(30).required(),
-  });
-
-  const validationResult = schema.validate({ username: username });
-  if (validationResult.error) {
-    console.log(validationResult.error);
-    // Possibly render an error page? Or popup?
-    return;
-  }
-
-  await userCollection.updateOne({username: req.session.username}, {$set: {username: username}});
-  res.redirect("/profile");
-});
-
-app.post("/editPhoto", async (req, res) => {
-  if (!req.file || !req.file.mimetype.startsWith("image/")) {
-    res.status(400).send("Please select a valid image file.");
-    return;
-  }
-
-  try {
-    const photoData = req.file.buffer; // Access the photo buffer directly
-
-    // Update the photo field for the current user in the users collection
-    await userCollection.updateOne(
-      { username: req.session.username },
-      { $set: { photo: photoData } }
-    );
-
-    res.redirect("/profile");
-  } catch (error) {
-    console.error("Failed to update photo:", error);
-    res.status(500).send("Failed to update photo.");
-  }
-
-
 
 
 app.use(express.static(__dirname + "/public"));
