@@ -226,10 +226,8 @@ app.get("/profile", hasSession, (req, res) => {
 });
 
 app.get("/pickTags", hasSession, (req, res) => {
-  req.session.pickedTags = req.session.pickedTags || [];
-  req.session.blacklistedTags = req.session.blacklistedTags || [];
-  console.log("Picked: " + req.session.pickedTags);
-  console.log("Blacklisted: " + req.session.blacklistedTags);
+  pickedTags = [];
+  blacklistedTags = [];
   // These have to be strings
   // TODO: Add more tags. Possibly store them in a database
   // TODO: Find a way to transfer tags between pages
