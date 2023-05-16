@@ -192,7 +192,7 @@ app.post('/changingPassword', async (req,res) => {
     
     if (req.session.authenticated){
       console.log(currentUser.username + "going to welcome");
-      res.render("welcome", {user: currentUser.username});
+      res.render("welcome", {isLoggedIn: req.session.authenticated, user: currentUser.username});
     }else{
       res.render("login");
     }
