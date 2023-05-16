@@ -11,6 +11,11 @@ function homeClicked() {
 document.getElementById("homeButton").onclick = homeClicked;
 
 function addClicked() {
-    window.location.href = "/add";
+    window.location.href = "/addMusic";
 }
 document.getElementById("addButton").onclick = addClicked;
+
+function logoutClicked() {
+    window.location.href = "/logout";
+}
+document.getElementById("logoutButton").onclick = logoutClicked;
