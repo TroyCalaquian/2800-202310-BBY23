@@ -54,6 +54,14 @@ app.use(
   })
 );
 
+function hasSession(req, res, next) {
+  if (req.session.authenticated) {
+    next();
+  } else {
+    res.redirect("/login");
+  }
+}
+
 
 app.get('/', (req,res) => {
     var sessionState = req.session.authenticated;
@@ -109,11 +117,7 @@ app.post('/loggingin', async (req,res) => {
 });
 
 app.get('/loggedin', (req,res) => {
-    if (!req.session.authenticated) {
-        res.redirect('/login');
-    }
-    res.redirect('/welcome');
-    
+  res.redirect('/welcome');
 });
 
 app.get('/signup', (req,res) => {
@@ -152,16 +156,8 @@ app.post('/submitUser', async (req,res) => {
       res.redirect('/welcome');
 });
 
-app.get('/welcome', (req,res) => {
-  
-  if (req.session.authenticated) {
-
-      res.render("welcome", {isLoggedIn: req.session.authenticated, userName: req.session.name});
-
-  }
-  else {
-      res.redirect('/login');
-  }
+app.get('/welcome', hasSession, (req,res) => {
+  res.render("welcome", {isLoggedIn: req.session.authenticated, userName: req.session.name});
 });
 
 app.get('/changePassword', (req,res) =>{
@@ -223,15 +219,15 @@ app.get('/logout', (req,res) => {
     res.render("welcome", {isLoggedIn: sessionState, userName: username});
 });
   
-app.get("/home", (req, res) => {
+app.get("/home", hasSession, (req, res) => {
   res.render("index");
 });
 
-app.get("/profile", (req, res) => {
+app.get("/profile", hasSession, (req, res) => {
   res.render("profile");
 });
 
-app.get("/pickTags", (req, res) => {
+app.get("/pickTags", hasSession, (req, res) => {
   pickedTags = [];
   blacklistedTags = [];
   // These have to be strings
@@ -273,23 +269,23 @@ app.get("/pickTags", (req, res) => {
   
 
 
-app.get("/confirmTags", (req, res) => {
+app.get("/confirmTags", hasSession, (req, res) => {
   res.render("confirmTags", {pickedTags: pickedTags, blacklistedTags: blacklistedTags});
 });
 
-app.post("/confirmChoices", async (req, res) => {
+app.post("/confirmChoices", hasSession, async (req, res) => {
   res.redirect("/results");
 });
 
-app.get("/results", (req, res) => {
+app.get("/results", hasSession, (req, res) => {
   res.render("results");
 });
 
-app.get("/addMusic", (req, res) => {
+app.get("/addMusic", hasSession, (req, res) => {
   res.render("addMusic");
 });
 
-app.post("/editUsername", async (req, res) => {
+app.post("/editUsername", hasSession, async (req, res) => {
   var username = req.body.username;
   const schema = Joi.object({
     username: Joi.string().min(3).max(30).required(),
