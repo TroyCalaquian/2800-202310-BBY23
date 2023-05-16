@@ -13,8 +13,8 @@
           <label for="tag<%= i %>"><%= tags[i] %></label>
           <select name="actions">
             <option value=""></option>
-            <option value="add">Add</option>
-            <option value="blacklist">Blacklist</option>
+            <option value="add" <% if (pickedTags.includes(tags[i])) { %>selected<% } %>>Add</option>
+            <option value="blacklist" <% if (blacklistedTags.includes(tags[i])) { %>selected<% } %>>Blacklist</option>
           </select>
           <input type="hidden" name="tags" value="<%= tags[i] %>">
         <br></li>
