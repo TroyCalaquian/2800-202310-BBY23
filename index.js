@@ -110,24 +110,34 @@ async function getTracksFromPlayList(playlistId) {
 }
 
 async function getSongDetails(songCode) {
-  console.log("getSongDetails(" + songCode + ") Called");
-  const response = await spotifyApi.getTrack(songCode);
-  console.log(response);
+  const response = await spotifyApi.getAudioFeaturesForTrack(songCode);
+  const audioFeatures = response.body;
+
+  const extractedData = {
+    danceability: audioFeatures.danceability,
+    energy: audioFeatures.energy,
+    key: audioFeatures.key,
+    loudness: audioFeatures.loudness,
+    mode: audioFeatures.mode,
+    speechiness: audioFeatures.speechiness,
+    acousticness: audioFeatures.acousticness,
+    instrumentalness: audioFeatures.instrumentalness,
+    liveness: audioFeatures.liveness,
+    valence: audioFeatures.valence,
+    tempo: audioFeatures.tempo,
+  };
+
+console.log("Stringify extractedData: " + JSON.stringify(extractedData, null, 2));
 };
 
 app.get('/success', async (req, res) => {
-  console.log("/success Start");
   const tracksDetails = await getTracksFromPlayList(playListCodeLocal);
   const songDetails = await getSongDetails(songCodeLocal);
 
   if (!Array.isArray(tracksDetails)) {
     console.log('trackDetails is not an array @ /success');
   }
-  if (!Array.isArray(songDetails)) {
-    console.log('songDetails is not an array @ /success');
-  }
 
-  console.log("/success End");
   res.render('success', { inputArray: tracksDetails, playlistCode: playListCodeLocal, 
                           songObject: songDetails, songCode: songCodeLocal });
 });
