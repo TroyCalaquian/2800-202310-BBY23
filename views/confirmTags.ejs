@@ -5,36 +5,33 @@
 
 <div class="centered">
   <h1>You okay with these settings?</h1>
-
-  <% if (pickedTags.length !== 0) { %>
-    <h4>Tags</h4>
-    <ul>
-      <% for (let i = 0; i < pickedTags.length; i++) { %>
-        <li>
-          <label for="tag<%= i %>"><%= pickedTags[i] %></label>
-          <input type="hidden" name="tags" value="<%= pickedTags[i] %>">
-        </li>
-      <% } %>
+  <br>
+  <h4>Insert playlist name here later</h4>
+  <br>
+  <% if (pickedTags.length > 0) { %>
+    <h4>Chosen tags</h4>
+    <% for (let i = 0; i < pickedTags.length; i++) { %>
+      <h6><%= pickedTags[i] %></h6>
+    <% } %>
     </ul>
   <% } %>
-  <% if (blacklistedTags.length !== 0) { %>
-    <h4>Blacklisted</h4>
-    <ul>
+  <% if (blacklistedTags.length > 0) { %>
+    <h4>Blacklisted tags</h4>
       <% for (let i = 0; i < blacklistedTags.length; i++) { %>
-        <li>
-          <label for="tag<%= i %>"><%= blacklistedTags[i] %></label>
-          <input type="hidden" name="tags" value="<%= blacklistedTags[i] %>">
-        </li>
+        <h6><%= blacklistedTags[i] %></h6>
       <% } %>
-    </ul>
   <% } %>
-  <form method="post" action="/confirmChoices">
-    <button type="submit">Confirm Choices</button>
-  </form>
-
-  <form method="get" action="/pickTags">
-    <button type="submit">Go Back</button>
-  </form>
+  <% if (blacklistedTags.length === 0 && pickedTags.length === 0) { %>
+    <h4>No tags chosen</h4>
+  <% } %>
+  <br>
+  <div class="centered" style="display: flex;">
+    <form method="post" action="/confirmChoices">
+      <button type="submit" style="background-color: lightgreen;">Gimme that mix!</button>
+    </form>
+    <div style="margin-left: 10px;"></div>
+    <button onclick="location.href='/pickTags'" style="background-color: lightcoral;">Hold up, I want to change something</button>
+  </div>  
 </div>
 
 
