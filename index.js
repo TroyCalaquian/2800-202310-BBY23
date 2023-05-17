@@ -1,6 +1,8 @@
 require("./utils.js");
+// const spotify = require("./public/scripts/spotifyAPI.js");
 
 require("dotenv").config();
+const SpotifyWebApi = require('spotify-web-api-node');
 
 const express = require("express");
 const app = express();
@@ -54,12 +56,157 @@ app.use(
   })
 );
 
+const spotify_client_id = process.env.SPOTIFY_CLIENT_ID;
+const spotify_client_secret = process.env.SPOTIFY_CLIENT_SECRET;
+const redirectURI = 'http://localhost:3000/callback';
+const successRedirect = '/success';
+const errorRedirect = '/error';
+
+const spotifyApi = new SpotifyWebApi({
+  clientId: spotify_client_id,
+  clientSecret: spotify_client_secret,
+});
+
+app.get('/spotify', async (req, res) => {
+  try {
+    // Retrieve an access token to authenticate your requests
+    const sData = await spotifyApi.clientCredentialsGrant();
+    const accessToken = sData.body['access_token'];
+
+    // Set the access token for subsequent API requests
+    spotifyApi.setAccessToken(accessToken);
+
+    res.redirect("success");
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'An error occurred' });
+  }
+});
+
+const playListCodeLocal = "6RcPwqOPVVyU3H9sRxJOrR";
+const songCodeLocal = "5e9TFTbltYBg2xThimr0rU";
+
+async function getTracksFromPlayList(playlistId) {
+  try {
+    const response = await spotifyApi.getPlaylistTracks(playlistId);
+    const tracks = response.body.items;
+
+    const songsArray = []; // Create an empty array to store the entries
+
+    // const songArtists = "";
+    tracks.forEach((track, index) => {
+      const { name, artists, external_urls } = track.track;
+      const artistNamesL = artists.map(artist => artist.name).join(', ');
+      // const songUrl = external_urls.spotify;
+      var jsonParsed = {songName: name, artists: artistNamesL};
+      // console.log(jsonParsed + " + " + songURL + "\n\n");
+      songsArray.push(jsonParsed); // Save each entry to the result array
+    });
+
+    return songsArray;
+  } catch (error) {
+    console.error('Error printing playlist songs:', error);
+  }
+}
+
+async function getSongDetails(songCode) {
+  console.log("getSongDetails(" + songCode + ") Called");
+  const response = await spotifyApi.getTrack(songCode);
+  console.log(response);
+};
+
+app.get('/success', async (req, res) => {
+  console.log("/success Start");
+  const tracksDetails = await getTracksFromPlayList(playListCodeLocal);
+  const songDetails = await getSongDetails(songCodeLocal);
+
+  if (!Array.isArray(tracksDetails)) {
+    console.log('trackDetails is not an array @ /success');
+  }
+  if (!Array.isArray(songDetails)) {
+    console.log('songDetails is not an array @ /success');
+  }
+
+  console.log("/success End");
+  res.render('success', { inputArray: tracksDetails, playlistCode: playListCodeLocal, 
+                          songObject: songDetails, songCode: songCodeLocal });
+});
+
+function printDirect(tracksInput) {
+  tracksInput.forEach((track, index) => {
+    const { name, artists } = track.track;
+    const artistNames = artists.map(artist => artist.name).join(', ');
+    console.log(`${index + 1}. ${name} - ${artistNames}`);
+  });
+}
+
+function printArray(arrayInput) {
+  arrayInput.forEach(function(track) {
+    console.log(track);
+  });
+}
+
+module.exports = {
+  getTracksFromPlayList
+}
+
+app.get('/error', (req,res) => {
+  res.render("error");
+});
 
 app.get('/', (req,res) => {
     var sessionState = req.session.authenticated;
     var username = req.session.name;
 
     res.render("welcome", {isLoggedIn: sessionState, userName: username});
+});
+
+app.get('/callback', async (req, res) => {
+  const code = req.query.code;
+  console.log("/callback passed");
+
+  try {
+    // Exchange authorization code for access and refresh tokens
+    const authOptions = {
+      url: 'https://accounts.spotify.com/api/token',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      auth: {
+        username: clientID,
+        password: clientSecret,
+      },
+      data: querystring.stringify({
+        grant_type: 'authorization_code',
+        code: code,
+        redirect_uri: redirectURI,
+      }),
+    };
+
+    const response = await axios(authOptions);
+    const { access_token, refresh_token } = response.data;
+
+    // Use the access token to make API requests
+    // e.g., get user profile details
+    const userOptions = {
+      url: 'https://api.spotify.com/v1/me',
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${access_token}`,
+      },
+    };
+
+    const userResponse = await axios(userOptions);
+    const userProfile = userResponse.data;
+
+    // Redirect to success page with user profile
+    res.redirect(`${successRedirect}?${querystring.stringify(userProfile)}`);
+  } catch (error) {
+    console.error('Error:', error.message);
+    // Redirect to error page
+    res.redirect(errorRedirect);
+  }
 });
 
 app.get('/login', (req,res) => {
@@ -118,9 +265,7 @@ app.get('/loggedin', (req,res) => {
 
 app.get('/signup', (req,res) => {
    res.render("signup");
-});
-
-// After signup, posts to this 
+}); 
 
 app.post('/submitUser', async (req,res) => {
     var username = req.body.username;
@@ -239,40 +384,37 @@ app.get("/pickTags", (req, res) => {
   res.render("pickTags" , {tags: tags});
 });
 
+app.post("/updateTags", (req, res) => {
+  const tags = req.body.tags; // Array of selected tags
+  const actions = req.body.actions; // Array of corresponding actions for each tag
 
-  app.post("/updateTags", (req, res) => {
-    const tags = req.body.tags; // Array of selected tags
-    const actions = req.body.actions; // Array of corresponding actions for each tag
-
-    // TODO: Add check for whether the user already inputted a playlist
-    if (typeof tags === 'undefined' || tags.length == 0) {
-      // No tags were selected
-      res.redirect("/confirmTags");
-      return;
-    }
-  
-    for (let i = 0; i < tags.length; i++) {
-      const tag = tags[i];
-      const action = actions[i];
-  
-      // Handle the selected action for each tag
-      if (action === "add") {
-        pickedTags.push(tag); // Add the tag to the pickedTags array
-      } else if (action === "blacklist") {
-        blacklistedTags.push(tag); // Add the tag to the blacklistedTags array
-      } else if (action === "blank") {
-        // Remove the tag from both arrays, if it exists
-        pickedTags = pickedTags.filter((pickedTag) => pickedTag !== tag);
-        blacklistedTags = blacklistedTags.filter((blacklistedTag) => blacklistedTag !== tag);
-      }
-    }
-  
-    // Redirect back to the /pickTags page or any other desired page
+  // TODO: Add check for whether the user already inputted a playlist
+  if (typeof tags === 'undefined' || tags.length == 0) {
+    // No tags were selected
     res.redirect("/confirmTags");
-  });
+    return;
+  }
+
+  for (let i = 0; i < tags.length; i++) {
+    const tag = tags[i];
+    const action = actions[i];
+
+    // Handle the selected action for each tag
+    if (action === "add") {
+      pickedTags.push(tag); // Add the tag to the pickedTags array
+    } else if (action === "blacklist") {
+      blacklistedTags.push(tag); // Add the tag to the blacklistedTags array
+    } else if (action === "blank") {
+      // Remove the tag from both arrays, if it exists
+      pickedTags = pickedTags.filter((pickedTag) => pickedTag !== tag);
+      blacklistedTags = blacklistedTags.filter((blacklistedTag) => blacklistedTag !== tag);
+    }
+  }
+
+  // Redirect back to the /pickTags page or any other desired page
+  res.redirect("/confirmTags");
+});
   
-
-
 app.get("/confirmTags", (req, res) => {
   res.render("confirmTags", {pickedTags: pickedTags, blacklistedTags: blacklistedTags});
 });
@@ -327,9 +469,6 @@ app.post("/editPhoto", async (req, res) => {
     res.status(500).send("Failed to update photo.");
   }
 });
-
-
-
 
 app.use(express.static(__dirname + "/public"));
 

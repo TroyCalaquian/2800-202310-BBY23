@@ -1,0 +1,29 @@
+<%- include('./templates/htmlOpen') %>
+
+<!-- Stylesheets added here -->
+
+<%- include('./templates/header') %>
+
+<h1 class="centered">Spotify Loaded</h1>
+<button class="centered">Click Me</button>
+<h3 class="centered"> Code: <%= playlistCode %></h3>
+
+<!-- < console.log("Song Code: " + songCode); %> -->
+
+<table class="centered" style="width:90vw;">
+    <% inputArray.forEach(function(entry) { %>
+      <tr>
+        <td><%= entry.songName %></td>
+        <td><%= entry.artists %></td>
+        <!-- <td><a href="<= entry.link %>">Link</a></td> -->
+      </tr>
+    <% }); %>
+  </table>
+  
+
+<!-- JS scripts added here -->
+
+<script src="../scripts/spotifyUtils.js"></script>
+<!-- <script src="../scripts/spotifyAccess.js"></script> -->
+
+<%- include('./templates/htmlClose') %>
