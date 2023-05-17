@@ -6,6 +6,11 @@
 <br>
 <div class="centered">
   <h1>Choose your tags</h1>
+  <form method="get" action="/pickTags">
+    <input type="text" name="search" placeholder="Search tags">
+    <button type="submit">Search</button>
+  </form>
+  <br>
   <form method="post" action="/updateTags">
     <ul>
       <% for (let i = 0; i < tags.length; i++) { %>
@@ -20,7 +25,13 @@
         <br></li>
       <% } %>
     </ul>
-    <button type="submit">Submit</button>
+    <div class="centered" style="display: flex">
+      <button type="submit" style="background-color: lightgreen;">Submit</button>
+      <div style="margin-left: 10px;"></div>
+      <form method="post" action="/resetTags">
+        <button type="submit" style="background-color: lightcoral;">Reset tags</button>
+      </form>
+    </div>
   </form>
 </div>
 
