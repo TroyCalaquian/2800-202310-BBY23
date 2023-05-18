@@ -278,7 +278,7 @@ app.get("/pickTags", hasSession, async (req, res) => {
     return res.redirect("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
   }
 
-    // Filter the tags based on the search query
+  // Filter the tags based on the search query
   const filteredTags = tags.filter((tag) =>
     tag.toLowerCase().includes(searchQuery.toLowerCase())
   );
