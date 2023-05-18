@@ -284,6 +284,7 @@ app.get("/pickTags", hasSession, (req, res) => {
     tags: filteredTags,
     pickedTags: req.session.pickedTags,
     blacklistedTags: req.session.blacklistedTags,
+    searchQuery: searchQuery,
   });
 });
 
