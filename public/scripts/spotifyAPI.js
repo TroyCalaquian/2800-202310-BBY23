@@ -54,6 +54,7 @@ async function getSongDetails(songCode) {
   const artistNames = artists.map(artist => artist.name).join('&');
 
   const extractedData = {
+    songID: songCode,
     songName: name,
     artists: artistNames,
     danceability: audioFeatures.danceability,
