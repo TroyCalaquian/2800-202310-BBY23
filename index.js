@@ -6,6 +6,7 @@ const Joi        = require("joi");
 const bcrypt     = require("bcrypt");
 const saltRounds = 12;
 require("dotenv").config();
+const { Configuration, OpenAIApi } = require("openai");
 
 /* Required Values */
 const app        = express();
@@ -13,6 +14,11 @@ const port       = 3000;
 const expireTime = 60 * 60 * 1000;
 var pickedTags      = [];
 var blacklistedTags = [];
+const configuration = new Configuration({
+  apiKey: process.env.OPENAI_API_KEY,
+})
+
+const openai = new OpenAIApi(configuration);
 
 /* Linked JS file's functions */
 const { getTracks, getSongDetails, getTracksFromPlayList, spotifyAPI, getAccessToken } = require('./public/scripts/spotifyAPI.js');

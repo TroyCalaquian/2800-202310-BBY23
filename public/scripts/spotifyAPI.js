@@ -81,13 +81,51 @@ async function getSongDetails(songCode) {
 };
 
 async function getTracks() {
-  spotifyAPI.searchTracks('genre:hip-hop')
+  let limit = 50
+  let  offset = 3
+  spotifyAPI.searchTracks('genre:hip-hop', {limit, offset})
   .then(function(data) {
-    console.log('Search by "Hip-hop"', data.body.tracks.items[0].album.id);
+    for(i =0; i <  data.body.tracks.items.length; i++){
+      console.log('Search by "Hip-hop"', data.body.tracks.items[i].id);
+    }
   }, function(err) {
     console.error(err);
   });
 }
+
+// Search tracks by genre and retrieve the track IDs
+// async function searchTracksByGenre(genre) {
+//   console.log("gebnre searching")
+//   const limit = 1; // Adjust the number of tracks per request as needed
+//   let offset = 0;
+//   let total = 1; // Start with a value that exceeds the limit
+
+//   const trackIds = [];
+
+//   while (offset < total) {
+//     const data = await spotifyAPI.searchTracks(`genre:${genre}`, { limit, offset });
+//     const tracks = data.body.tracks;
+
+//     total = tracks.total;
+//     offset += limit;
+
+//     for (const track of tracks.items) {
+//       trackIds.push(track.id);
+//     }
+//   }
+
+//   return trackIds;
+// }
+
+// Usage example
+// async function main() {
+//   await getAccessToken();
+
+//   const genre = 'hip-hop';
+//   const trackIds = await searchTracksByGenre(genre);
+
+//   console.log("yes seirrr" + trackIds);
+// }
 
 // Export the functions or the entire Spotify API module
 module.exports = { getTracks, getSongDetails, getTracksFromPlayList, spotifyAPI, getAccessToken };
