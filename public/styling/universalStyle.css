@@ -17,4 +17,13 @@
 .centered {
     justify-content: center;
     text-align: center;
+    display: flex;
+    align-items: center;
+}
+
+button.centered {
+    justify-content: center;
+    text-align: center;
+    display: flex;
+    align-items: center;
 }
