@@ -11,10 +11,32 @@
         <input name='username' type='text' placeholder='username'>
         <input name='email' type='email' placeholder='email'>
         <input name='password' type='password' placeholder='password'>
-        <input name='answer' type='text' placeholder='favorite animal'>
 
-    <br><button>Submit</button>
+        <!-- <label for="color">Select a color:</label> -->
+        <br>
+        <select id="security_question" name="security_question" required >
+          <option value="" disabled selected>Select a security question</option>
+          <option value="What is your favorite animal?">What is your favorite animal?</option>
+          <option value="What is your mother's maiden name?">What is your mother's maiden name?</option>
+          <option value="What was the name of your first pet?">What was the name of your first pet?</option>
+          <option value="What city were you born in?">What city were you born in?</option>
+          <option value="What is your favorite movie?">What is your favorite movie?</option>
+          <option value="What was the brand of your first car?">What was the brand of your first car?</option>
+          <option value="Who is your best friend?">Who is your best friend?</option>
+          <option value="What is the name of your favorite teacher?">What is the name of your favorite teacher?</option>
+          <option value="What is your favorite book?">What is your favorite book?</option>
+          <option value="What is your favorite vacation destination?">What is your favorite vacation destination?</option>
+          <option value="What is the name of the street you grew up on?">What is the name of the street you grew up on?</option>
+        </select>
+        <input name='answer' type='text' placeholder='security answer'>
+        
+        <!-- <input name='answer' type='text' placeholder='favorite animal'> -->
+
+        <br><button>Submit</button>
+
     </form>
+    
+
 </div>
 
 <%- include('./templates/footer') %>
