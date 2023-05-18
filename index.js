@@ -269,8 +269,6 @@ app.get("/pickTags", hasSession, async (req, res) => {
   var collection = await genreCollection.find({}).project({genres: 1}).toArray();
   var tags = collection[0].genres;
 
-  console.log(tags);
-
   const searchQuery = req.query.search || "";
 
   if (searchQuery === "RickRoll") {
@@ -296,6 +294,8 @@ app.post("/resetTags", hasSession, (req, res) => {
   // Reset the pickedTags and blacklistedTags arrays in the session object
   req.session.pickedTags = [];
   req.session.blacklistedTags = [];
+
+  req.query.search = "";
 
   res.redirect("/pickTags");
 });
