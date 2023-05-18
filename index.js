@@ -54,6 +54,12 @@ app.use(
   })
 );
 
+app.use(function(req, res, next) {
+  const userLoginStatus = req.session.authenticated || false;
+  res.locals.userLoginStatus = userLoginStatus;
+  next();
+});
+
 function hasSession(req, res, next) {
   if (req.session.authenticated) {
     next();
