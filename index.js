@@ -246,7 +246,7 @@ app.get("/home", hasSession, (req, res) => {
 
 app.get("/profile", hasSession, (req, res) => {
   var username = req.session.name;
-  res.render("profile", {userName: username});
+  res.render("profile", { userName: username });
 });
 
 app.get("/pickTags", hasSession, (req, res) => {
@@ -274,6 +274,7 @@ app.get("/pickTags", hasSession, (req, res) => {
     tags: filteredTags,
     pickedTags: req.session.pickedTags,
     blacklistedTags: req.session.blacklistedTags,
+    searchQuery: searchQuery,
   });
 });
 
