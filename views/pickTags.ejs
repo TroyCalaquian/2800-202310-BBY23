@@ -11,7 +11,7 @@
     <button type="submit">Search</button>
   </form>
   <br>
-    <form method="post" action="/updateTags">
+    <form method="post" action="/updateTags" enctype="multipart/form-data">
       <div class="tag-container">
       <% if (tags.length === 0) { %>
         <h4>No tags found</h4>
