@@ -2,13 +2,16 @@ require("./utils.js");
 
 require("dotenv").config();
 
+const multer = require("multer");
+// Set up multer middleware
+const genreMulter = multer();
+
 const express = require("express");
 const app = express();
 const session = require("express-session");
 const MongoStore = require("connect-mongo");
 const bcrypt = require("bcrypt");
 const saltRounds = 12;
-const multer  = require('multer');
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage });
 const sharp = require("sharp");
@@ -258,17 +261,20 @@ app.get("/profile", hasSession, async (req, res) => {
   }
 });
 
-
-app.get("/pickTags", hasSession, (req, res) => {
+app.get("/pickTags", hasSession, async (req, res) => {
   req.session.pickedTags = req.session.pickedTags || [];
   req.session.blacklistedTags = req.session.blacklistedTags || [];
-  // These have to be strings
-  // TODO: Add more tags. Possibly store them in a database
-  // TODO: Find a way to transfer tags between pages
-  var tags = ["test1", "test2", "tag3", "tag4", "tag5", "tag6"];
 
-  // Get the search query from the URL query parameters
+  const genreCollection = database.db("genres").collection("genres");
+  var collection = await genreCollection.find({}).project({genres: 1}).toArray();
+  var tags = collection[0].genres;
+
   const searchQuery = req.query.search || "";
+
+  if (searchQuery === "RickRoll") {
+    // Redirect to the Rick Astley's "Never Gonna Give You Up" video on YouTube
+    return res.redirect("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+  }
 
   // Filter the tags based on the search query
   const filteredTags = tags.filter((tag) =>
@@ -279,23 +285,24 @@ app.get("/pickTags", hasSession, (req, res) => {
     tags: filteredTags,
     pickedTags: req.session.pickedTags,
     blacklistedTags: req.session.blacklistedTags,
+    searchQuery: searchQuery,
   });
 });
+
 
 app.post("/resetTags", hasSession, (req, res) => {
   // Reset the pickedTags and blacklistedTags arrays in the session object
   req.session.pickedTags = [];
   req.session.blacklistedTags = [];
 
+  req.query.search = "";
+
   res.redirect("/pickTags");
 });
 
-app.post("/updateTags", hasSession, (req, res) => {
+app.post("/updateTags", hasSession, genreMulter.array("tags"), (req, res) => {
   const tags = req.body.tags; // Array of selected tags
   const actions = req.body.actions; // Array of corresponding actions for each tag
-
-  console.log("tags: " + tags);
-  console.log("actions: " + actions);
 
   // Retrieve the pickedTags and blacklistedTags arrays from the session object
   let pickedTags = [];
