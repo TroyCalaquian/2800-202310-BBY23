@@ -10,19 +10,28 @@
 <% const songs = ['song1', 'song2', 'song3']; %>
 
 <!-- Assembly of pic & username -->
+<!-- Assembly of pic & username -->
 <div class="profileDisplay d-flex justify-content-center">
-    <img id="profilePic" src=<%- profileLink %> alt="Profile Picture">
+    <img id="profilePic" src="<%- user.pfp %>" alt="Profile Picture">
     <h1 id="username"><%- userName %></h1>
-
-    <!-- Edit Username Form -->
-    <form id="usernameForm" action="/editUsername" method="POST" style="display:none;">
-        <label for="username">New Username:</label>
-        <input type="text" id="username" name="username">
-        <input type="submit" value="Change Username">
-    </form>
 </div>
 
-<button id="editUsernameButton">Edit Username</button>
+
+  <!-- Edit Username Form -->
+  <form id="usernameForm" action="/editUsername" method="POST" style="display:none;">
+    <label for="username">New Username:</label>
+    <input type="text" id="username" name="username">
+    <input type="submit" value="Change Username">
+</form>
+    
+<!-- Edit PFP From -->
+<form id="profilePictureForm" action="/editPhoto" method="POST" enctype="multipart/form-data" style="display:none;">
+    <input type="file" name="profilePicture" id="profilePictureInput" accept="image/*">
+    <button type="submit">Upload</button>
+  </form>
+  
+  <button id="editUsernameButton">Edit Username</button>
+  <button id="editPfpButton">Update Profile Picture</button>
 
 <!-- This user's playlists -->
 <br><div id="userPlaylists">
@@ -41,6 +50,11 @@
     document.getElementById('editUsernameButton').addEventListener('click', function() {
         document.getElementById('usernameForm').style.display = 'block';
     });
+
+    document.getElementById('editPfpButton').addEventListener('click', function() {
+        document.getElementById('profilePictureForm').style.display = 'block';
+    });
+
 </script>
 
 <%- include('./templates/htmlClose') %> 
