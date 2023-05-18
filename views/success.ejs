@@ -1,27 +1,27 @@
 <%- include('./templates/htmlOpen') %>
 
 <!-- Stylesheets added here -->
+<link rel="stylesheet" href="../styling/successCSS.css">
 
 <%- include('./templates/header') %>
 
 <h1 class="centered">Spotify Loaded</h1>
-<button class="centered">Click Me</button>
-<h3 class="centered"> Code: <%= playlistCode %></h3>
 
-<!-- < console.log("Song Code: " + songCode); %> -->
+<form onsubmit="handleFormSubmit(event)" class="centered">
+  <label for="playlistURL">Playlist URL:</label>
+  <input type="text" id="playlistURL" name="playlistURL">
+  <button type="submit">Submit</button>
+</form><br>
+<h3 class="centered"> Code: <%= playlistCode %></h3><br>
 
-<table class="centered" style="width:90vw;">
-    <% inputArray.forEach(function(entry) { %>
-      <tr>
-        <td><%= entry.songName %></td>
-        <td><%= entry.artists %></td>
-        <td><a href="<%= entry.songURL %>" target="_blank">Song</a></td>
-        <% console.log( "Local:" + entry.songURL) %>
-      </tr>
-    <% }); %>
-  </table>
-  
+<div class="card-container d-flex justify-content-start centered">
+  <% inputArray.forEach(function(entry) { %>
+    <%- include('./templates/songCard', { entry: entry }) %>
+  <% }) %>
+</div>
 
+<script src="../scripts/spotifyUser.js"></script>
+<script src="../scripts/successJS.js"></script>
 <!-- JS scripts added here -->
 
 <%- include('./templates/htmlClose') %>

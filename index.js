@@ -1,43 +1,46 @@
-require("./utils.js");
-
+/* Module requirements */
+const express    = require("express");
+const session    = require("express-session");
+const MongoStore = require("connect-mongo");
+const Joi        = require("joi");
+const bcrypt     = require("bcrypt");
+const saltRounds = 12;
 require("dotenv").config();
 
-const SpotifyWebApi = require('spotify-web-api-node');
-
-const express = require("express");
+/* Required Values */
 const app = express();
-
-const session = require("express-session");
-const MongoStore = require("connect-mongo");
-const bcrypt = require("bcrypt");
-const saltRounds = 12;
-
 const port = 3000;
-
-const Joi = require("joi");
-
 const expireTime = 60 * 60 * 1000;
 var pickedTags = [];
 var blacklistedTags = [];
 
-/* secret information section */
+/* Linked JS file's functions */
+const { getSongDetails, getTracksFromPlayList, spotifyAPI, getAccessToken } = require('./public/scripts/spotifyAPI.js');
+require("./utils.js");
+
+/* Node Server Setups */
+app.set("view engine", "ejs");
+app.use(express.urlencoded({ extended: false }));
+
+/* MongoDB Secrets & Variables */
 const mongodb_host = process.env.MONGODB_HOST;
 const mongodb_user = process.env.MONGODB_USER;
 const mongodb_password = process.env.MONGODB_PASSWORD;
 const mongodb_database = process.env.MONGODB_DATABASE;
 const mongodb_session_secret = process.env.MONGODB_SESSION_SECRET;
-
 const node_session_secret = process.env.NODE_SESSION_SECRET;
-/* END secret section */
 
+/* Database Connections */
 var { database } = include("databaseConnection");
-
 const userCollection = database.db(mongodb_database).collection("users");
 const playlistCollection = database.db(mongodb_database).collection("playlists");
 
-app.set("view engine", "ejs");
-
-app.use(express.urlencoded({ extended: false }));
+/* Spotify Variables */
+const redirectURI = 'http://localhost:3000/callback';
+const successRedirect = '/success';
+const errorRedirect = '/error';
+const playListCodeLocal = "6RcPwqOPVVyU3H9sRxJOrR"; // To be replace w/ user inputs
+const songCodeLocal = "2CeKVsFFXG4QzA415QygGb"; // To be replaces w/ user inputs
 
 var mongoStore = MongoStore.create({
   mongoUrl: `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/?retryWrites=true&w=majority`,
@@ -56,79 +59,9 @@ app.use(
   })
 );
 
-/** Spotify variables, I hope to move everything spotify related to seperate JS file to declutter */
-const spotify_client_id = process.env.SPOTIFY_CLIENT_ID;
-const spotify_client_secret = process.env.SPOTIFY_CLIENT_SECRET;
-const redirectURI = 'http://localhost:3000/callback';
-const successRedirect = '/success';
-const errorRedirect = '/error';
-const spotifyApi = new SpotifyWebApi({
-  clientId: spotify_client_id,
-  clientSecret: spotify_client_secret,
-});
-const playListCodeLocal = "6RcPwqOPVVyU3H9sRxJOrR";
-const songCodeLocal = "5e9TFTbltYBg2xThimr0rU";
-
-async function getTracksFromPlayList(playlistId) {
-  try {
-    const response = await spotifyApi.getPlaylistTracks(playlistId);
-    const tracks = response.body.items;
-
-    const songsArray = []; // Create an empty array to store the entries
-
-    // const songArtists = "";
-    tracks.forEach((track, index) => {
-      const { name, artists, external_urls } = track.track;
-      const songUrlLocal = external_urls.spotify;
-      console.log("\nURL: " + songUrlLocal + "\n");
-      const artistNamesL = artists.map(artist => artist.name).join(', ');
-      var jsonParsed = {songName: name, artists: artistNamesL, songURL: songUrlLocal};
-      songsArray.push(jsonParsed); // Save each entry to the result array
-    });
-
-    return songsArray;
-  } catch (error) {
-    console.error('Error printing playlist songs:', error);
-  }
-}
-
-async function getSongDetails(songCode) {
-  const response = await spotifyApi.getAudioFeaturesForTrack(songCode);
-  const audioFeatures = response.body;
-
-  const trackInfo = await spotifyApi.getTrack(songCode);
-  const { artists, name } = trackInfo.body;
-  const artistNames = artists.map(artist => artist.name).join(', ');
-  
-
-  const extractedData = {
-    songName: name,
-    artists: artistNames,
-    genre: audioFeatures.genre,
-    danceability: audioFeatures.danceability,
-    energy: audioFeatures.energy,
-    key: audioFeatures.key,
-    loudness: audioFeatures.loudness,
-    mode: audioFeatures.mode,
-    speechiness: audioFeatures.speechiness,
-    acousticness: audioFeatures.acousticness,
-    instrumentalness: audioFeatures.instrumentalness,
-    liveness: audioFeatures.liveness,
-    valence: audioFeatures.valence,
-    tempo: audioFeatures.tempo,
-  };
-
-console.log("Stringify extractedData: " + JSON.stringify(extractedData, null, 2));
-};
-
 app.get('/spotify', async (req, res) => {
   try {
-    // Retrieve an access token to authenticate your requests
-    const sData = await spotifyApi.clientCredentialsGrant();
-    const accessToken = sData.body['access_token'];
-
-    // Set the access token for subsequent API requests
-    spotifyApi.setAccessToken(accessToken);
+    await getAccessToken();
 
     res.redirect("success");
   } catch (error) {
@@ -148,24 +81,6 @@ app.get('/success', async (req, res) => {
   res.render('success', { inputArray: tracksDetails, playlistCode: playListCodeLocal, 
                           songObject: songDetails, songCode: songCodeLocal });
 });
-
-function printDirect(tracksInput) {
-  tracksInput.forEach((track, index) => {
-    const { name, artists } = track.track;
-    const artistNames = artists.map(artist => artist.name).join(', ');
-    console.log(`${index + 1}. ${name} - ${artistNames}`);
-  });
-}
-
-function printArray(arrayInput) {
-  arrayInput.forEach(function(track) {
-    console.log(track);
-  });
-}
-
-module.exports = {
-  getTracksFromPlayList
-}
 
 app.get('/error', (req,res) => {
   res.render("error");
