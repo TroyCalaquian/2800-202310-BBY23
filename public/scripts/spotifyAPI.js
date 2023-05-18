@@ -83,7 +83,10 @@ async function getSongDetails(songCode) {
 
 async function getTracks() {
   let limit = 50
-  let  offset = 10
+  // for (i = 20; i < 50; i++){
+    var  offset = 21
+  // }
+
   let ids = ''
   spotifyAPI.searchTracks('genre:hip-hop', {limit, offset})
   .then(function(data) {
