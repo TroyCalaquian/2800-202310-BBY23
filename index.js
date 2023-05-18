@@ -260,6 +260,11 @@ app.get("/pickTags", hasSession, (req, res) => {
   // Get the search query from the URL query parameters
   const searchQuery = req.query.search || "";
 
+  if (searchQuery === "RickRoll") {
+    // Redirect to the Rick Astley's "Never Gonna Give You Up" video on YouTube
+    return res.redirect("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+  }
+
   // Filter the tags based on the search query
   const filteredTags = tags.filter((tag) =>
     tag.toLowerCase().includes(searchQuery.toLowerCase())
