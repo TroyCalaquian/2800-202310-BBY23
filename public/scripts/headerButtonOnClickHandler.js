@@ -1,5 +1,10 @@
 console.log("headerButtonOnClick.js loaded");
 
+function logoClicked(){
+    window.location.href = "/home";
+}
+document.getElementById("logoButton").onclick = logoClicked;
+
 function profileClicked() {
     window.location.href = "/profile";
 }
