@@ -13,7 +13,16 @@
 <div class="profileDisplay d-flex justify-content-center">
     <img id="profilePic" src=<%- profileLink %> alt="Profile Picture">
     <h1 id="username"><%- userName %></h1>
+
+    <!-- Edit Username Form -->
+    <form id="usernameForm" action="/editUsername" method="POST" style="display:none;">
+        <label for="username">New Username:</label>
+        <input type="text" id="username" name="username">
+        <input type="submit" value="Change Username">
+    </form>
 </div>
+
+<button id="editUsernameButton">Edit Username</button>
 
 <!-- This user's playlists -->
 <br><div id="userPlaylists">
@@ -28,5 +37,10 @@
 <%- include('./templates/footer') %>
 
 <!-- js scripts added here -->
+<script>
+    document.getElementById('editUsernameButton').addEventListener('click', function() {
+        document.getElementById('usernameForm').style.display = 'block';
+    });
+</script>
 
-<%- include('./templates/htmlClose') %>
+<%- include('./templates/htmlClose') %> 

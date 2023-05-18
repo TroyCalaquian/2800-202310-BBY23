@@ -5,6 +5,8 @@ require("dotenv").config();
 const express = require("express");
 const app = express();
 
+
+
 const session = require("express-session");
 const MongoStore = require("connect-mongo");
 const bcrypt = require("bcrypt");
@@ -366,6 +368,8 @@ app.post("/editUsername", hasSession, async (req, res) => {
     { username: req.session.name },
     { $set: { username: username } }
   );
+  
+  req.session.name = username; // updating session with new username
   res.redirect("/profile");
 });
 
