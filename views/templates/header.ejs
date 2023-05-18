@@ -10,7 +10,11 @@
         <button class="nav-item nav-link active" id="profileButton">Profile</a>
         <button class="nav-item nav-link active" id="homeButton">Home</a>
         <button class="nav-item nav-link active" id="addButton">Add</a>
+      <% if (userLoginStatus) { %>
         <button class="nav-item nav-link active" id="logoutButton">Logout</a>
+      <%} else {%>
+        <button class="nav-item nav-link active" id="loginButton">Login</a>
+      <%}%>
       </div>
     </div>
   </nav>
