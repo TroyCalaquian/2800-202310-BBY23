@@ -71,5 +71,14 @@ async function getSongDetails(songCode) {
   console.log("Stringify extractedData: " + JSON.stringify(extractedData, null, 2));
 };
 
+async function gettracks(){
+  spotifyAPI.searchTracks('genre:hip-hop')
+  .then(function(data) {
+    console.log('Search by "Hip-hop"', data.body.tracks.items[0].album.id);
+  }, function(err) {
+    console.error(err);
+  });
+}
+
 // Export the functions or the entire Spotify API module
-module.exports = { getSongDetails, getTracksFromPlayList, spotifyAPI, getAccessToken };
+module.exports = { gettracks, getSongDetails, getTracksFromPlayList, spotifyAPI, getAccessToken };

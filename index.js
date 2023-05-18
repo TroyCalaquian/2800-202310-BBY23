@@ -15,7 +15,7 @@ var pickedTags = [];
 var blacklistedTags = [];
 
 /* Linked JS file's functions */
-const { getSongDetails, getTracksFromPlayList, spotifyAPI, getAccessToken } = require('./public/scripts/spotifyAPI.js');
+const {gettracks, getSongDetails, getTracksFromPlayList, spotifyAPI, getAccessToken } = require('./public/scripts/spotifyAPI.js');
 require("./utils.js");
 
 /* Node Server Setups */
@@ -73,8 +73,7 @@ app.get('/spotify', async (req, res) => {
 app.get('/success', async (req, res) => {
   const tracksDetails = await getTracksFromPlayList(playListCodeLocal);
   const songDetails = await getSongDetails(songCodeLocal)
-  getaudianalysis(songCodeLocal)
-  
+  await gettracks()  
   if (!Array.isArray(tracksDetails)) {
     console.log('trackDetails is not an array @ /success');
   }
