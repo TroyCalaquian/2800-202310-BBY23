@@ -4,11 +4,14 @@ require("dotenv").config();
 
 const express = require("express");
 const app = express();
-
 const session = require("express-session");
 const MongoStore = require("connect-mongo");
 const bcrypt = require("bcrypt");
 const saltRounds = 12;
+const multer  = require('multer');
+const storage = multer.memoryStorage()
+const upload = multer({ storage: storage });
+const sharp = require("sharp");
 
 const port = 3000;
 
@@ -244,10 +247,17 @@ app.get("/home", hasSession, (req, res) => {
   res.render("index");
 });
 
-app.get("/profile", hasSession, (req, res) => {
-  var username = req.session.name;
-  res.render("profile", {userName: username});
+app.get("/profile", hasSession, async (req, res) => {
+  try {
+    const user = await userCollection.findOne({ username: req.session.name });
+
+    res.render("profile", { user: user, userName: req.session.name });
+  } catch (error) {
+    console.error("Failed to retrieve user data:", error);
+    res.status(500).send("Failed to retrieve user data.");
+  }
 });
+
 
 app.get("/pickTags", hasSession, (req, res) => {
   req.session.pickedTags = req.session.pickedTags || [];
@@ -366,10 +376,14 @@ app.post("/editUsername", hasSession, async (req, res) => {
     { username: req.session.name },
     { $set: { username: username } }
   );
+  
+  req.session.name = username; // updating session with new username
   res.redirect("/profile");
 });
 
-app.post("/editPhoto", async (req, res) => {
+
+
+app.post("/editPhoto", upload.single("profilePicture"), async (req, res) => {
   if (!req.file || !req.file.mimetype.startsWith("image/")) {
     res.status(400).send("Please select a valid image file.");
     return;
@@ -378,18 +392,38 @@ app.post("/editPhoto", async (req, res) => {
   try {
     const photoData = req.file.buffer; // Access the photo buffer directly
 
+    if (!photoData || photoData.length === 0) {
+      throw new Error("Empty photo data.");
+    }
+
+    // Resize the image to a maximum of 500x500 pixels
+    // This will maintain the aspect ratio of the image
+    const resizedImageData = await sharp(photoData)
+      .resize(200, 200, {
+        fit: sharp.fit.inside, // keep aspect ratio, don't crop the image
+        withoutEnlargement: true // don't enlarge if source image size is smaller than given size
+      })
+      .toBuffer();
+
+    // Create a base64 data URL with the correct mime type
+    const base64DataUrl = `data:${req.file.mimetype};base64,${resizedImageData.toString('base64')}`;
+
     // Update the photo field for the current user in the users collection
     await userCollection.updateOne(
-      { username: req.session.username },
-      { $set: { photo: photoData } }
+      { username: req.session.name },
+      { $set: { pfp: base64DataUrl } }
     );
 
+    console.log("Profile picture updated:", req.session.name);
     res.redirect("/profile");
   } catch (error) {
     console.error("Failed to update photo:", error);
     res.status(500).send("Failed to update photo.");
   }
 });
+
+
+
 
 app.use(express.static(__dirname + "/public"));
 
