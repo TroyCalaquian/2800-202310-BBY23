@@ -31,13 +31,12 @@
         <% } %>
       </ul>
       <% } %>
-      </div>
-      <div class="button-group">
-        <button type="submit" style="background-color: lightgreen;">Submit</button>
-        <button type="button" onclick="resetTags()" style="background-color: lightcoral;">Reset tags</button>
-      </div>
-    </form>
-  </div>
+    </ul>
+    <div class="button-group">
+      <button type="submit" style="background-color: lightgreen;">Submit</button>
+      <button type="button" onclick="resetTags()" style="background-color: lightcoral;">Reset tags</button>
+    </div>
+  </form>
 </div>
 
 <script>
@@ -55,16 +54,6 @@
     form.submit();
   }
 </script>
-
-<style>
-  .tag-container {
-    max-height: 200px; /* Adjust the max height as needed */
-    overflow-y: auto;
-    border: 1px solid #ccc;
-    padding: 10px;
-  }
-</style>
-
 
 
 <%- include('./templates/footer') %>
