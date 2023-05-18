@@ -124,6 +124,15 @@ async function getSongDetails(songCode) {
 console.log("Stringify extractedData: " + JSON.stringify(extractedData, null, 2));
 };
 
+async function getaudianalysis(trackid){
+  let analysis_url = spotifyApi.getAudioAnalysisForTrack(trackid)
+  .then(function(data) {
+    console.log(data.body);
+  }, function(err) {
+    done(err);
+  });
+}
+
 app.get('/spotify', async (req, res) => {
   try {
     // Retrieve an access token to authenticate your requests
@@ -143,11 +152,12 @@ app.get('/spotify', async (req, res) => {
 app.get('/success', async (req, res) => {
   const tracksDetails = await getTracksFromPlayList(playListCodeLocal);
   const songDetails = await getSongDetails(songCodeLocal)
+  getaudianalysis(songCodeLocal)
   
   if (!Array.isArray(tracksDetails)) {
     console.log('trackDetails is not an array @ /success');
   }
-
+  // console.log("Analysis" + getAudioAnalysisForTrack)
   res.render('success', { inputArray: tracksDetails, playlistCode: playListCodeLocal, 
                           songObject: songDetails, songCode: songCodeLocal });
 });
