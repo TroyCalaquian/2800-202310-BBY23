@@ -8,19 +8,20 @@ const saltRounds = 12;
 require("dotenv").config();
 
 /* Required Values */
-const app = express();
-const port = 3000;
+const app        = express();
+const port       = 3000;
 const expireTime = 60 * 60 * 1000;
-var pickedTags = [];
+var pickedTags      = [];
 var blacklistedTags = [];
 
 /* Linked JS file's functions */
-const {gettracks, getSongDetails, getTracksFromPlayList, spotifyAPI, getAccessToken } = require('./public/scripts/spotifyAPI.js');
+const { getTracks, getSongDetails, getTracksFromPlayList, spotifyAPI, getAccessToken } = require('./public/scripts/spotifyAPI.js');
 require("./utils.js");
 
 /* Node Server Setups */
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: false }));
+app.use(express.static(__dirname + "/public"));
 
 /* MongoDB Secrets & Variables */
 const mongodb_host = process.env.MONGODB_HOST;
@@ -40,7 +41,7 @@ const redirectURI = 'http://localhost:3000/callback';
 const successRedirect = '/success';
 const errorRedirect = '/error';
 const playListCodeLocal = "6RcPwqOPVVyU3H9sRxJOrR"; // To be replace w/ user inputs
-const songCodeLocal = "2CeKVsFFXG4QzA415QygGb"; // To be replaces w/ user inputs
+const songCodeLocal = "5e9TFTbltYBg2xThimr0rU"; // To be replaces w/ user inputs
 
 var mongoStore = MongoStore.create({
   mongoUrl: `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/?retryWrites=true&w=majority`,
@@ -71,9 +72,11 @@ app.get('/spotify', async (req, res) => {
 });
 
 app.get('/success', async (req, res) => {
+  await getAccessToken();
   const tracksDetails = await getTracksFromPlayList(playListCodeLocal);
-  const songDetails = await getSongDetails(songCodeLocal)
-  await gettracks()  
+  const songDetails = await getSongDetails(songCodeLocal);
+  await getTracks();
+
   if (!Array.isArray(tracksDetails)) {
     console.log('trackDetails is not an array @ /success');
   }
@@ -401,8 +404,6 @@ app.post("/editPhoto", async (req, res) => {
     res.status(500).send("Failed to update photo.");
   }
 });
-
-app.use(express.static(__dirname + "/public"));
 
 app.get("*", (req, res) => {
   res.status(404);

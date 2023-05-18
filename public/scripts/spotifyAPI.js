@@ -33,7 +33,7 @@ async function getTracksFromPlayList(playlistId) {
       const songUrlLocal = external_urls.spotify;
 
       const artistNamesL = artists.map(artist => artist.name).join(', ');
-      var jsonParsed = {songName: name, artists: artistNamesL, songURL: songUrlLocal};
+      var jsonParsed = {songName: name, artists: artistNamesL, songURL: songUrlLocal, imageURL: "https://dummyimage.com/500x500/000/fff&text=Record+Image" };
       songsArray.push(jsonParsed); // Save each entry to the result array
     });
 
@@ -43,18 +43,19 @@ async function getTracksFromPlayList(playlistId) {
   }
 }
 
+const fs = require('fs');
+
 async function getSongDetails(songCode) {
   const response = await spotifyAPI.getAudioFeaturesForTrack(songCode);
   const audioFeatures = response.body;
 
   const trackInfo = await spotifyAPI.getTrack(songCode);
   const { artists, name } = trackInfo.body;
-  const artistNames = artists.map(artist => artist.name).join(', ');
+  const artistNames = artists.map(artist => artist.name).join('&');
 
   const extractedData = {
     songName: name,
     artists: artistNames,
-    genre: audioFeatures.genre,
     danceability: audioFeatures.danceability,
     energy: audioFeatures.energy,
     key: audioFeatures.key,
@@ -69,9 +70,17 @@ async function getSongDetails(songCode) {
   };
   // Store data scraped from Spotify in a JSON object
   console.log("Stringify extractedData: " + JSON.stringify(extractedData, null, 2));
+
+  // Generate CSV string
+  const csvString = Object.values(extractedData).join(',') + '\n';
+
+  // Save CSV string to a file
+  fs.appendFileSync('song_details.csv', csvString, 'utf8');
+
+  console.log('Data saved to song_details.csv');
 };
 
-async function gettracks(){
+async function getTracks() {
   spotifyAPI.searchTracks('genre:hip-hop')
   .then(function(data) {
     console.log('Search by "Hip-hop"', data.body.tracks.items[0].album.id);
@@ -81,4 +90,4 @@ async function gettracks(){
 }
 
 // Export the functions or the entire Spotify API module
-module.exports = { gettracks, getSongDetails, getTracksFromPlayList, spotifyAPI, getAccessToken };
+module.exports = { getTracks, getSongDetails, getTracksFromPlayList, spotifyAPI, getAccessToken };

@@ -6,10 +6,14 @@ function handleFormSubmit(event) {
   
   // Access the form data
   const playlistURL = document.getElementById('playlistURL').value;
-    
+  const match = playlistURL.match(spotifyPlaylistRegex);
+  
+
   if (!spotifyPlaylistRegex.test(playlistURL)) {
     console.log('Invalid Spotify playlist URL:', playlistURL);
   } else {
+    const playlistID = match[1];
     console.log('Playlist URL:', playlistURL);
+    console.log('Playlist ID:', playlistID);
   }
 }
