@@ -4,7 +4,7 @@ require("dotenv").config();
 
 const multer = require("multer");
 // Set up multer middleware
-const upload = multer();
+const genreMulter = multer();
 
 const express = require("express");
 const app = express();
@@ -12,7 +12,6 @@ const session = require("express-session");
 const MongoStore = require("connect-mongo");
 const bcrypt = require("bcrypt");
 const saltRounds = 12;
-const multer  = require('multer');
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage });
 const sharp = require("sharp");
@@ -301,7 +300,7 @@ app.post("/resetTags", hasSession, (req, res) => {
   res.redirect("/pickTags");
 });
 
-app.post("/updateTags", hasSession, upload.array("tags"), (req, res) => {
+app.post("/updateTags", hasSession, genreMulter.array("tags"), (req, res) => {
   const tags = req.body.tags; // Array of selected tags
   const actions = req.body.actions; // Array of corresponding actions for each tag
 
