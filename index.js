@@ -93,13 +93,16 @@ async function getTracksFromPlayList(playlistId) {
 }
 
 async function getSongDetails(songCode) {
-  const response = await spotifyApi.getAudioFeaturesForTrack(songCode);
+  const response = await spotifyApi.getAudioFeaturesForTrack(songCode)
+  // .then(data => {
+    // const sections = response.body.analysis_url;
+    // console.log(sections)
+  // })
   const audioFeatures = response.body;
-
   const trackInfo = await spotifyApi.getTrack(songCode);
   const { artists, name } = trackInfo.body;
   const artistNames = artists.map(artist => artist.name).join(', ');
-  
+
 
   const extractedData = {
     songName: name,
@@ -139,8 +142,8 @@ app.get('/spotify', async (req, res) => {
 
 app.get('/success', async (req, res) => {
   const tracksDetails = await getTracksFromPlayList(playListCodeLocal);
-  const songDetails = await getSongDetails(songCodeLocal);
-
+  const songDetails = await getSongDetails(songCodeLocal)
+  
   if (!Array.isArray(tracksDetails)) {
     console.log('trackDetails is not an array @ /success');
   }
@@ -166,6 +169,9 @@ function printArray(arrayInput) {
 module.exports = {
   getTracksFromPlayList
 }
+
+
+
 
 app.get('/error', (req,res) => {
   res.render("error");
