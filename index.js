@@ -245,7 +245,8 @@ app.get("/home", hasSession, (req, res) => {
 });
 
 app.get("/profile", hasSession, (req, res) => {
-  res.render("profile");
+  var username = req.session.name;
+  res.render("profile", {userName: username});
 });
 
 app.get("/pickTags", hasSession, (req, res) => {
@@ -362,7 +363,7 @@ app.post("/editUsername", hasSession, async (req, res) => {
   }
 
   await userCollection.updateOne(
-    { username: req.session.username },
+    { username: req.session.name },
     { $set: { username: username } }
   );
   res.redirect("/profile");
