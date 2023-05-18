@@ -1,7 +1,7 @@
 require("./utils.js");
-// const spotify = require("./public/scripts/spotifyAPI.js");
 
 require("dotenv").config();
+
 const SpotifyWebApi = require('spotify-web-api-node');
 
 const express = require("express");
@@ -56,16 +56,70 @@ app.use(
   })
 );
 
+/** Spotify variables, I hope to move everything spotify related to seperate JS file to declutter */
 const spotify_client_id = process.env.SPOTIFY_CLIENT_ID;
 const spotify_client_secret = process.env.SPOTIFY_CLIENT_SECRET;
 const redirectURI = 'http://localhost:3000/callback';
 const successRedirect = '/success';
 const errorRedirect = '/error';
-
 const spotifyApi = new SpotifyWebApi({
   clientId: spotify_client_id,
   clientSecret: spotify_client_secret,
 });
+const playListCodeLocal = "6RcPwqOPVVyU3H9sRxJOrR";
+const songCodeLocal = "5e9TFTbltYBg2xThimr0rU";
+
+async function getTracksFromPlayList(playlistId) {
+  try {
+    const response = await spotifyApi.getPlaylistTracks(playlistId);
+    const tracks = response.body.items;
+
+    const songsArray = []; // Create an empty array to store the entries
+
+    // const songArtists = "";
+    tracks.forEach((track, index) => {
+      const { name, artists, external_urls } = track.track;
+      const songUrlLocal = external_urls.spotify;
+      console.log("\nURL: " + songUrlLocal + "\n");
+      const artistNamesL = artists.map(artist => artist.name).join(', ');
+      var jsonParsed = {songName: name, artists: artistNamesL, songURL: songUrlLocal};
+      songsArray.push(jsonParsed); // Save each entry to the result array
+    });
+
+    return songsArray;
+  } catch (error) {
+    console.error('Error printing playlist songs:', error);
+  }
+}
+
+async function getSongDetails(songCode) {
+  const response = await spotifyApi.getAudioFeaturesForTrack(songCode);
+  const audioFeatures = response.body;
+
+  const trackInfo = await spotifyApi.getTrack(songCode);
+  const { artists, name } = trackInfo.body;
+  const artistNames = artists.map(artist => artist.name).join(', ');
+  
+
+  const extractedData = {
+    songName: name,
+    artists: artistNames,
+    genre: audioFeatures.genre,
+    danceability: audioFeatures.danceability,
+    energy: audioFeatures.energy,
+    key: audioFeatures.key,
+    loudness: audioFeatures.loudness,
+    mode: audioFeatures.mode,
+    speechiness: audioFeatures.speechiness,
+    acousticness: audioFeatures.acousticness,
+    instrumentalness: audioFeatures.instrumentalness,
+    liveness: audioFeatures.liveness,
+    valence: audioFeatures.valence,
+    tempo: audioFeatures.tempo,
+  };
+
+console.log("Stringify extractedData: " + JSON.stringify(extractedData, null, 2));
+};
 
 app.get('/spotify', async (req, res) => {
   try {
@@ -82,53 +136,6 @@ app.get('/spotify', async (req, res) => {
     res.status(500).json({ error: 'An error occurred' });
   }
 });
-
-const playListCodeLocal = "6RcPwqOPVVyU3H9sRxJOrR";
-const songCodeLocal = "5e9TFTbltYBg2xThimr0rU";
-
-async function getTracksFromPlayList(playlistId) {
-  try {
-    const response = await spotifyApi.getPlaylistTracks(playlistId);
-    const tracks = response.body.items;
-
-    const songsArray = []; // Create an empty array to store the entries
-
-    // const songArtists = "";
-    tracks.forEach((track, index) => {
-      const { name, artists, external_urls } = track.track;
-      const artistNamesL = artists.map(artist => artist.name).join(', ');
-      // const songUrl = external_urls.spotify;
-      var jsonParsed = {songName: name, artists: artistNamesL};
-      // console.log(jsonParsed + " + " + songURL + "\n\n");
-      songsArray.push(jsonParsed); // Save each entry to the result array
-    });
-
-    return songsArray;
-  } catch (error) {
-    console.error('Error printing playlist songs:', error);
-  }
-}
-
-async function getSongDetails(songCode) {
-  const response = await spotifyApi.getAudioFeaturesForTrack(songCode);
-  const audioFeatures = response.body;
-
-  const extractedData = {
-    danceability: audioFeatures.danceability,
-    energy: audioFeatures.energy,
-    key: audioFeatures.key,
-    loudness: audioFeatures.loudness,
-    mode: audioFeatures.mode,
-    speechiness: audioFeatures.speechiness,
-    acousticness: audioFeatures.acousticness,
-    instrumentalness: audioFeatures.instrumentalness,
-    liveness: audioFeatures.liveness,
-    valence: audioFeatures.valence,
-    tempo: audioFeatures.tempo,
-  };
-
-console.log("Stringify extractedData: " + JSON.stringify(extractedData, null, 2));
-};
 
 app.get('/success', async (req, res) => {
   const tracksDetails = await getTracksFromPlayList(playListCodeLocal);
