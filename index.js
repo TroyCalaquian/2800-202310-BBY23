@@ -1,41 +1,64 @@
-require("./utils.js");
 
+/* Module requirements */
+const express     = require("express");
+const session     = require("express-session");
+const multer      = require("multer");
+const genreMulter = multer();
+const MongoStore  = require("connect-mongo");
+const Joi         = require("joi");
+const bcrypt      = require("bcrypt");
+
+/* Multer Values */
+const storage     = multer.memoryStorage()
+const upload      = multer({ storage: storage });
+const sharp       = require("sharp");
+
+const { Configuration, OpenAIApi } = require("openai");
 require("dotenv").config();
 
-const express = require("express");
-const app = express();
-
-const session = require("express-session");
-const MongoStore = require("connect-mongo");
-const bcrypt = require("bcrypt");
-const saltRounds = 12;
-
-const port = 3000;
-
-const Joi = require("joi");
-
+/* Required Values */
+const app        = express();
+const port       = 3000;
 const expireTime = 60 * 60 * 1000;
+const saltRounds = 12;
+var pickedTags      = [];
+var blacklistedTags = [];
+const configuration = new Configuration({
+  apiKey: process.env.OPENAI_API_KEY,
+})
 
-/* secret information section */
+const openai = new OpenAIApi(configuration);
+
+/* Linked JS file's functions */
+const { getTracks, getSongDetails, getTracksFromPlayList, spotifyAPI, getAccessToken } = require('./public/scripts/spotifyAPI.js');
+require("./utils.js");
+
+/* Node Server Setups */
+app.set("view engine", "ejs");
+app.use(express.urlencoded({ extended: false }));
+app.use(express.static(__dirname + "/public"));
+
+/* MongoDB Secrets & Variables */
 const mongodb_host = process.env.MONGODB_HOST;
 const mongodb_user = process.env.MONGODB_USER;
 const mongodb_password = process.env.MONGODB_PASSWORD;
 const mongodb_database = process.env.MONGODB_DATABASE;
 const mongodb_session_secret = process.env.MONGODB_SESSION_SECRET;
-
 const node_session_secret = process.env.NODE_SESSION_SECRET;
-/* END secret section */
 
+/* Database Connections */
 var { database } = include("databaseConnection");
-
 const userCollection = database.db(mongodb_database).collection("users");
 const playlistCollection = database
   .db(mongodb_database)
   .collection("playlists");
 
-app.set("view engine", "ejs");
-
-app.use(express.urlencoded({ extended: false }));
+/* Spotify Variables */
+const redirectURI = 'http://localhost:3000/callback';
+const successRedirect = '/success';
+const errorRedirect = '/error';
+const playListCodeLocal = "6RcPwqOPVVyU3H9sRxJOrR"; // To be replace w/ user inputs
+const songCodeLocal = "3F5CgOj3wFlRv51JsHbxhe"; // To be replaces w/ user inputs
 
 var mongoStore = MongoStore.create({
   mongoUrl: `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/?retryWrites=true&w=majority`,
@@ -68,15 +91,129 @@ function hasSession(req, res, next) {
   }
 }
 
-app.get("/", (req, res) => {
-  var sessionState = req.session.authenticated;
-  var username = req.session.name;
+const fs = require('fs');
+const csv = require('csv-parser');
+
+var printAt = 0;
+
+function readCSVWithDelay(csvFilePath) {
+  const rows = [];
+  fs.createReadStream(csvFilePath)
+    .pipe(csv())
+    .on('data', (row) => {
+      rows.push(row);
+    })
+    .on('end', () => {
+      printRowsWithDelay(rows);
+    });
+}
+
+function printRowsWithDelay(rows) {
+  let delay = 0;
+  for (let i = 0; i < rows.length; i++) {
+    setTimeout(async () => {
+      await getAccessToken();
+      const songID = rows[i].song_ID; // Replace "song_ID" with the actual property name
+      console.log(songID);
+      getSongDetails(songID)
+    }, delay);
+    delay += 3000; // 30-second delay
+  }
+}
+
+const csvFilePath = 'C:\\Users\\MaxwellV\\Desktop\\song_id.csv';
+// const csvFilePath = 'C:\\Users\\MaxwellV\\Documents\\SoundScopeWorking\\2800-202310-BBY23\\song_id.csv';
+
+// readCSVWithDelay(csvFilePath);
+
+
+app.get('/spotify', async (req, res) => {
+  try {
+    await getAccessToken();
+
+    res.redirect("success");
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'An error occurred' });
+  }
+});
+
+app.get('/success', async (req, res) => {
+  await getAccessToken();
+  const tracksDetails = await getTracksFromPlayList(playListCodeLocal);
+  const songDetails = await getSongDetails(songCodeLocal);
+  await getTracks();
+
+  if (!Array.isArray(tracksDetails)) {
+    console.log('trackDetails is not an array @ /success');
+  }
+  // console.log("Analysis" + getAudioAnalysisForTrack)
+  res.render('success', { inputArray: tracksDetails, playlistCode: playListCodeLocal, 
+                          songObject: songDetails, songCode: songCodeLocal });
+});
+
+app.get('/error', (req,res) => {
+  res.render("error");
+});
+
+app.get('/', (req,res) => {
+    var sessionState = req.session.authenticated;
+    var username = req.session.name;
 
   res.render("welcome", { isLoggedIn: sessionState, userName: username });
 });
 
-app.get("/login", (req, res) => {
-  res.render("login");
+app.get('/callback', async (req, res) => {
+  const code = req.query.code;
+  console.log("/callback passed");
+
+  try {
+    // Exchange authorization code for access and refresh tokens
+    const authOptions = {
+      url: 'https://accounts.spotify.com/api/token',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      auth: {
+        username: clientID,
+        password: clientSecret,
+      },
+      data: querystring.stringify({
+        grant_type: 'authorization_code',
+        code: code,
+        redirect_uri: redirectURI,
+      }),
+    };
+
+    const response = await axios(authOptions);
+    const { access_token, refresh_token } = response.data;
+
+    // Use the access token to make API requests
+    // e.g., get user profile details
+    const userOptions = {
+      url: 'https://api.spotify.com/v1/me',
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${access_token}`,
+      },
+    };
+
+    const userResponse = await axios(userOptions);
+    const userProfile = userResponse.data;
+
+    // Redirect to success page with user profile
+    res.redirect(`${successRedirect}?${querystring.stringify(userProfile)}`);
+  } catch (error) {
+    console.error('Error:', error.message);
+    // Redirect to error page
+    res.redirect(errorRedirect);
+  }
+});
+
+app.get('/login', (req,res) => {
+    res.render("login");
+
 });
 
 app.post("/loggingin", async (req, res) => {
@@ -127,11 +264,9 @@ app.get("/loggedin", hasSession, (req, res) => {
   res.redirect("/welcome");
 });
 
-app.get("/signup", (req, res) => {
-  res.render("signup");
-});
-
-// After signup, posts to this
+app.get('/signup', (req,res) => {
+   res.render("signup");
+}); 
 
 app.post("/submitUser", async (req, res) => {
   var username = req.body.username;
@@ -261,20 +396,31 @@ app.get("/home", hasSession, (req, res) => {
   res.render("index");
 });
 
-app.get("/profile", hasSession, (req, res) => {
-  res.render("profile");
+app.get("/profile", hasSession, async (req, res) => {
+  try {
+    const user = await userCollection.findOne({ username: req.session.name });
+
+    res.render("profile", { user: user, userName: req.session.name });
+  } catch (error) {
+    console.error("Failed to retrieve user data:", error);
+    res.status(500).send("Failed to retrieve user data.");
+  }
 });
 
-app.get("/pickTags", hasSession, (req, res) => {
+app.get("/pickTags", hasSession, async (req, res) => {
   req.session.pickedTags = req.session.pickedTags || [];
   req.session.blacklistedTags = req.session.blacklistedTags || [];
-  // These have to be strings
-  // TODO: Add more tags. Possibly store them in a database
-  // TODO: Find a way to transfer tags between pages
-  var tags = ["test1", "test2", "tag3", "tag4", "tag5", "tag6"];
 
-  // Get the search query from the URL query parameters
+  const genreCollection = database.db("genres").collection("genres");
+  var collection = await genreCollection.find({}).project({genres: 1}).toArray();
+  var tags = collection[0].genres;
+
   const searchQuery = req.query.search || "";
+
+  if (searchQuery === "RickRoll") {
+    // Redirect to the Rick Astley's "Never Gonna Give You Up" video on YouTube
+    return res.redirect("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+  }
 
   // Filter the tags based on the search query
   const filteredTags = tags.filter((tag) =>
@@ -285,23 +431,28 @@ app.get("/pickTags", hasSession, (req, res) => {
     tags: filteredTags,
     pickedTags: req.session.pickedTags,
     blacklistedTags: req.session.blacklistedTags,
+    searchQuery: searchQuery,
   });
 });
 
+app.post("/updateTags", (req, res) => {
+  const tags = req.body.tags; // Array of selected tags
+  const actions = req.body.actions; // Array of corresponding actions for each tag
+}
+        
 app.post("/resetTags", hasSession, (req, res) => {
   // Reset the pickedTags and blacklistedTags arrays in the session object
   req.session.pickedTags = [];
   req.session.blacklistedTags = [];
 
+  req.query.search = "";
+
   res.redirect("/pickTags");
 });
 
-app.post("/updateTags", hasSession, (req, res) => {
+app.post("/updateTags", hasSession, genreMulter.array("tags"), (req, res) => {
   const tags = req.body.tags; // Array of selected tags
   const actions = req.body.actions; // Array of corresponding actions for each tag
-
-  console.log("tags: " + tags);
-  console.log("actions: " + actions);
 
   // Retrieve the pickedTags and blacklistedTags arrays from the session object
   let pickedTags = [];
@@ -379,13 +530,17 @@ app.post("/editUsername", hasSession, async (req, res) => {
   }
 
   await userCollection.updateOne(
-    { username: req.session.username },
+    { username: req.session.name },
     { $set: { username: username } }
   );
+  
+  req.session.name = username; // updating session with new username
   res.redirect("/profile");
 });
 
-app.post("/editPhoto", async (req, res) => {
+
+
+app.post("/editPhoto", upload.single("profilePicture"), async (req, res) => {
   if (!req.file || !req.file.mimetype.startsWith("image/")) {
     res.status(400).send("Please select a valid image file.");
     return;
@@ -394,20 +549,35 @@ app.post("/editPhoto", async (req, res) => {
   try {
     const photoData = req.file.buffer; // Access the photo buffer directly
 
+    if (!photoData || photoData.length === 0) {
+      throw new Error("Empty photo data.");
+    }
+
+    // Resize the image to a maximum of 500x500 pixels
+    // This will maintain the aspect ratio of the image
+    const resizedImageData = await sharp(photoData)
+      .resize(200, 200, {
+        fit: sharp.fit.inside, // keep aspect ratio, don't crop the image
+        withoutEnlargement: true // don't enlarge if source image size is smaller than given size
+      })
+      .toBuffer();
+
+    // Create a base64 data URL with the correct mime type
+    const base64DataUrl = `data:${req.file.mimetype};base64,${resizedImageData.toString('base64')}`;
+
     // Update the photo field for the current user in the users collection
     await userCollection.updateOne(
-      { username: req.session.username },
-      { $set: { photo: photoData } }
+      { username: req.session.name },
+      { $set: { pfp: base64DataUrl } }
     );
 
+    console.log("Profile picture updated:", req.session.name);
     res.redirect("/profile");
   } catch (error) {
     console.error("Failed to update photo:", error);
     res.status(500).send("Failed to update photo.");
   }
 });
-
-app.use(express.static(__dirname + "/public"));
 
 app.get("*", (req, res) => {
   res.status(404);
