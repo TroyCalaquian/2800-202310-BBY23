@@ -1,47 +1,64 @@
-require("./utils.js");
 
+/* Module requirements */
+const express     = require("express");
+const session     = require("express-session");
+const multer      = require("multer");
+const genreMulter = multer();
+const MongoStore  = require("connect-mongo");
+const Joi         = require("joi");
+const bcrypt      = require("bcrypt");
+
+/* Multer Values */
+const storage     = multer.memoryStorage()
+const upload      = multer({ storage: storage });
+const sharp       = require("sharp");
+
+const { Configuration, OpenAIApi } = require("openai");
 require("dotenv").config();
 
-const multer = require("multer");
-// Set up multer middleware
-const genreMulter = multer();
-
-const express = require("express");
-const app = express();
-const session = require("express-session");
-const MongoStore = require("connect-mongo");
-const bcrypt = require("bcrypt");
-const saltRounds = 12;
-const storage = multer.memoryStorage()
-const upload = multer({ storage: storage });
-const sharp = require("sharp");
-
-const port = 3000;
-
-const Joi = require("joi");
-
+/* Required Values */
+const app        = express();
+const port       = 3000;
 const expireTime = 60 * 60 * 1000;
+const saltRounds = 12;
+var pickedTags      = [];
+var blacklistedTags = [];
+const configuration = new Configuration({
+  apiKey: process.env.OPENAI_API_KEY,
+})
 
-/* secret information section */
+const openai = new OpenAIApi(configuration);
+
+/* Linked JS file's functions */
+const { getTracks, getSongDetails, getTracksFromPlayList, spotifyAPI, getAccessToken } = require('./public/scripts/spotifyAPI.js');
+require("./utils.js");
+
+/* Node Server Setups */
+app.set("view engine", "ejs");
+app.use(express.urlencoded({ extended: false }));
+app.use(express.static(__dirname + "/public"));
+
+/* MongoDB Secrets & Variables */
 const mongodb_host = process.env.MONGODB_HOST;
 const mongodb_user = process.env.MONGODB_USER;
 const mongodb_password = process.env.MONGODB_PASSWORD;
 const mongodb_database = process.env.MONGODB_DATABASE;
 const mongodb_session_secret = process.env.MONGODB_SESSION_SECRET;
-
 const node_session_secret = process.env.NODE_SESSION_SECRET;
-/* END secret section */
 
+/* Database Connections */
 var { database } = include("databaseConnection");
-
 const userCollection = database.db(mongodb_database).collection("users");
 const playlistCollection = database
   .db(mongodb_database)
   .collection("playlists");
 
-app.set("view engine", "ejs");
-
-app.use(express.urlencoded({ extended: false }));
+/* Spotify Variables */
+const redirectURI = 'http://localhost:3000/callback';
+const successRedirect = '/success';
+const errorRedirect = '/error';
+const playListCodeLocal = "6RcPwqOPVVyU3H9sRxJOrR"; // To be replace w/ user inputs
+const songCodeLocal = "3F5CgOj3wFlRv51JsHbxhe"; // To be replaces w/ user inputs
 
 var mongoStore = MongoStore.create({
   mongoUrl: `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/?retryWrites=true&w=majority`,
@@ -68,15 +85,129 @@ function hasSession(req, res, next) {
   }
 }
 
-app.get("/", (req, res) => {
-  var sessionState = req.session.authenticated;
-  var username = req.session.name;
+const fs = require('fs');
+const csv = require('csv-parser');
+
+var printAt = 0;
+
+function readCSVWithDelay(csvFilePath) {
+  const rows = [];
+  fs.createReadStream(csvFilePath)
+    .pipe(csv())
+    .on('data', (row) => {
+      rows.push(row);
+    })
+    .on('end', () => {
+      printRowsWithDelay(rows);
+    });
+}
+
+function printRowsWithDelay(rows) {
+  let delay = 0;
+  for (let i = 0; i < rows.length; i++) {
+    setTimeout(async () => {
+      await getAccessToken();
+      const songID = rows[i].song_ID; // Replace "song_ID" with the actual property name
+      console.log(songID);
+      getSongDetails(songID)
+    }, delay);
+    delay += 3000; // 30-second delay
+  }
+}
+
+const csvFilePath = 'C:\\Users\\MaxwellV\\Desktop\\song_id.csv';
+// const csvFilePath = 'C:\\Users\\MaxwellV\\Documents\\SoundScopeWorking\\2800-202310-BBY23\\song_id.csv';
+
+// readCSVWithDelay(csvFilePath);
+
+
+app.get('/spotify', async (req, res) => {
+  try {
+    await getAccessToken();
+
+    res.redirect("success");
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'An error occurred' });
+  }
+});
+
+app.get('/success', async (req, res) => {
+  await getAccessToken();
+  const tracksDetails = await getTracksFromPlayList(playListCodeLocal);
+  const songDetails = await getSongDetails(songCodeLocal);
+  await getTracks();
+
+  if (!Array.isArray(tracksDetails)) {
+    console.log('trackDetails is not an array @ /success');
+  }
+  // console.log("Analysis" + getAudioAnalysisForTrack)
+  res.render('success', { inputArray: tracksDetails, playlistCode: playListCodeLocal, 
+                          songObject: songDetails, songCode: songCodeLocal });
+});
+
+app.get('/error', (req,res) => {
+  res.render("error");
+});
+
+app.get('/', (req,res) => {
+    var sessionState = req.session.authenticated;
+    var username = req.session.name;
 
   res.render("welcome", { isLoggedIn: sessionState, userName: username });
 });
 
-app.get("/login", (req, res) => {
-  res.render("login");
+app.get('/callback', async (req, res) => {
+  const code = req.query.code;
+  console.log("/callback passed");
+
+  try {
+    // Exchange authorization code for access and refresh tokens
+    const authOptions = {
+      url: 'https://accounts.spotify.com/api/token',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      auth: {
+        username: clientID,
+        password: clientSecret,
+      },
+      data: querystring.stringify({
+        grant_type: 'authorization_code',
+        code: code,
+        redirect_uri: redirectURI,
+      }),
+    };
+
+    const response = await axios(authOptions);
+    const { access_token, refresh_token } = response.data;
+
+    // Use the access token to make API requests
+    // e.g., get user profile details
+    const userOptions = {
+      url: 'https://api.spotify.com/v1/me',
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${access_token}`,
+      },
+    };
+
+    const userResponse = await axios(userOptions);
+    const userProfile = userResponse.data;
+
+    // Redirect to success page with user profile
+    res.redirect(`${successRedirect}?${querystring.stringify(userProfile)}`);
+  } catch (error) {
+    console.error('Error:', error.message);
+    // Redirect to error page
+    res.redirect(errorRedirect);
+  }
+});
+
+app.get('/login', (req,res) => {
+    res.render("login");
+
 });
 
 app.post("/loggingin", async (req, res) => {
@@ -127,11 +258,9 @@ app.get("/loggedin", hasSession, (req, res) => {
   res.redirect("/welcome");
 });
 
-app.get("/signup", (req, res) => {
-  res.render("signup");
-});
-
-// After signup, posts to this
+app.get('/signup', (req,res) => {
+   res.render("signup");
+}); 
 
 app.post("/submitUser", async (req, res) => {
   var username = req.body.username;
@@ -289,7 +418,11 @@ app.get("/pickTags", hasSession, async (req, res) => {
   });
 });
 
-
+app.post("/updateTags", (req, res) => {
+  const tags = req.body.tags; // Array of selected tags
+  const actions = req.body.actions; // Array of corresponding actions for each tag
+}
+        
 app.post("/resetTags", hasSession, (req, res) => {
   // Reset the pickedTags and blacklistedTags arrays in the session object
   req.session.pickedTags = [];
@@ -428,11 +561,6 @@ app.post("/editPhoto", upload.single("profilePicture"), async (req, res) => {
     res.status(500).send("Failed to update photo.");
   }
 });
-
-
-
-
-app.use(express.static(__dirname + "/public"));
 
 app.get("*", (req, res) => {
   res.status(404);
