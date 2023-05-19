@@ -1,0 +1,27 @@
+
+table {
+    background-color: black;
+}
+
+table tr td {
+    background-color: lightgray;
+}
+
+#songDisplay {
+  display: none;
+}
+
+#myDiv *  {
+  background-color: aqua;
+  display: none;
+}
+
+.card-container {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.card {
+  min-width: 200px; /* Adjust the value to your desired minimum width */
+  min-height: 300px; /* Adjust the value to your desired minimum height */
+}
