@@ -77,6 +77,12 @@ app.use(
   })
 );
 
+app.use(function(req, res, next) {
+  const userLoginStatus = req.session.authenticated || false;
+  res.locals.userLoginStatus = userLoginStatus;
+  next();
+});
+
 function hasSession(req, res, next) {
   if (req.session.authenticated) {
     next();
@@ -266,6 +272,7 @@ app.post("/submitUser", async (req, res) => {
   var username = req.body.username;
   var email = req.body.email;
   var password = req.body.password;
+  var securityQuestion = req.body.security_question;
   var securityAnswer = req.body.answer;
 
   const schema = Joi.object({
@@ -294,6 +301,7 @@ app.post("/submitUser", async (req, res) => {
     username: username,
     password: hashedPassword,
     email: email,
+    Security_Question: securityQuestion,
     Security_Question_Answer: securityAnswer,
     user_type: "user",
     pfp: null,
@@ -316,7 +324,7 @@ app.get("/changePassword", (req, res) => {
   if (sessionState) {
     res.render("resetPassword", { sessionState: sessionState });
   } else {
-    res.render("securityQuestion");
+    res.render("securityQuestion", { firstEntrance: true});
   }
 });
 
@@ -351,20 +359,29 @@ app.post("/changingPassword", async (req, res) => {
 });
 
 app.post("/securityQuestion", async (req, res) => {
-  var useremail = req.body.email;
-  req.session.email = useremail;
+  var userNotFound = false;
   var securityans = req.body.answer;
-  let currentUser = await userCollection.findOne({ email: useremail });
-  if (!currentUser) {
-    res.render("securityQuestion");
-  } else {
-    if (
-      currentUser.email == useremail &&
-      currentUser.Security_Question_Answer == securityans
-    ) {
-      res.render("resetPassword");
-    }
+  var useremail = req.body.email;
+  console.log("User email: "+ useremail);//-----------
+  if(useremail != undefined){
+    req.session.email = useremail;
   }
+  console.log("Session email: "+ req.session.email);//-----------
+  var incorrectEmailMessage = "No user under that email exists";
+  let currentUser = await userCollection.findOne({ email: req.session.email });
+  console.log("CurrentUser email: "+ currentUser);//-----------
+  console.log("entered ans " + securityans + " emails ans " + currentUser.Security_Question_Answer);
+  if (!currentUser) {
+    userNotFound = true;
+    res.render("securityQuestion", {firstEntrance: false, userState: userNotFound, incorrectEmail: incorrectEmailMessage});
+  }else if (currentUser.Security_Question_Answer == securityans){
+    res.render("resetPassword");
+  } 
+  else {
+    userNotFound = false;
+    var usersQuestion = currentUser.Security_Question;
+    res.render("securityQuestion", {firstEntrance: false, userState: userNotFound, securityQuestion: usersQuestion});
+  } 
 });
 
 app.get("/logout", (req, res) => {
