@@ -83,8 +83,8 @@ async function getSongDetails(songCode) {
 
 async function getTracks() {
   let limit = 50
-  // for (i = 20; i < 50; i++){
-    var  offset = 21
+  for (i = 51; i < 100; i++){
+    var  offset = i
   // }
 
   let ids = ''
@@ -99,6 +99,7 @@ async function getTracks() {
   }, function(err) {
     console.error(err);
   });
+}
 }
 
 // Search tracks by genre and retrieve the track IDs
