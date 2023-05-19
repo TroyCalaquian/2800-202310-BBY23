@@ -83,7 +83,7 @@ async function getSongDetails(songCode) {
 
 async function getTracks() {
   let limit = 50
-  for (i = 51; i < 100; i++){
+  for (i = 0; i < 1; i++){
     var  offset = i
   // }
 
@@ -95,7 +95,7 @@ async function getTracks() {
       //  var csvString = Object.values(ids) + '\n'
        console.log('Search by "Hip-hop"', ids);
     }
-    fs.appendFileSync('song_id.csv', ids, 'utf-8');
+    // fs.appendFileSync('song_id.csv', ids, 'utf-8');
   }, function(err) {
     console.error(err);
   });
