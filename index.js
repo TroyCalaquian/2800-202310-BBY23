@@ -47,7 +47,7 @@ const redirectURI = 'http://localhost:3000/callback';
 const successRedirect = '/success';
 const errorRedirect = '/error';
 const playListCodeLocal = "6RcPwqOPVVyU3H9sRxJOrR"; // To be replace w/ user inputs
-const songCodeLocal = "5e9TFTbltYBg2xThimr0rU"; // To be replaces w/ user inputs
+const songCodeLocal = "3F5CgOj3wFlRv51JsHbxhe"; // To be replaces w/ user inputs
 
 var mongoStore = MongoStore.create({
   mongoUrl: `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/?retryWrites=true&w=majority`,
@@ -65,6 +65,43 @@ app.use(
     resave: true,
   })
 );
+
+
+const fs = require('fs');
+const csv = require('csv-parser');
+
+var printAt = 0;
+
+function readCSVWithDelay(csvFilePath) {
+  const rows = [];
+  fs.createReadStream(csvFilePath)
+    .pipe(csv())
+    .on('data', (row) => {
+      rows.push(row);
+    })
+    .on('end', () => {
+      printRowsWithDelay(rows);
+    });
+}
+
+function printRowsWithDelay(rows) {
+  let delay = 0;
+  for (let i = 0; i < rows.length; i++) {
+    setTimeout(async () => {
+      await getAccessToken();
+      const songID = rows[i].song_ID; // Replace "song_ID" with the actual property name
+      console.log(songID);
+      getSongDetails(songID)
+    }, delay);
+    delay += 3000; // 30-second delay
+  }
+}
+
+const csvFilePath = 'C:\\Users\\MaxwellV\\Desktop\\song_id.csv';
+// const csvFilePath = 'C:\\Users\\MaxwellV\\Documents\\SoundScopeWorking\\2800-202310-BBY23\\song_id.csv';
+
+// readCSVWithDelay(csvFilePath);
+
 
 app.get('/spotify', async (req, res) => {
   try {

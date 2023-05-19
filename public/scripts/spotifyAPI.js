@@ -70,7 +70,7 @@ async function getSongDetails(songCode) {
     tempo: audioFeatures.tempo,
   };
   // Store data scraped from Spotify in a JSON object
-  console.log("Stringify extractedData: " + JSON.stringify(extractedData, null, 2));
+//   console.log("Stringify extractedData: " + JSON.stringify(extractedData, null, 2));
 
   // Generate CSV string
   const csvString = Object.values(extractedData).join(',') + '\n';
@@ -82,24 +82,21 @@ async function getSongDetails(songCode) {
 };
 
 async function getTracks() {
-  let limit = 50
-  for (i = 51; i < 100; i++){
-    var  offset = i
-  // }
+//   let limit = 50
+//   let  offset = 10
+//   let ids = ''
+//   spotifyAPI.searchTracks('genre:hip-hop', {limit, offset})
+//   .then(function(data) {
+//     for(i =0; i <  data.body.tracks.items.length; i++){
+//        ids += data.body.tracks.items[i].id + '\n'
+//       //  var csvString = Object.values(ids) + '\n'
+//        console.log('Search by "Hip-hop"', ids);
+//     }
+//     fs.appendFileSync('song_id.csv', ids, 'utf-8');
+//   }, function(err) {
+//     console.error(err);
+//   });
 
-  let ids = ''
-  spotifyAPI.searchTracks('genre:hip-hop', {limit, offset})
-  .then(function(data) {
-    for(i =0; i <  data.body.tracks.items.length; i++){
-       ids += data.body.tracks.items[i].id + '\n'
-      //  var csvString = Object.values(ids) + '\n'
-       console.log('Search by "Hip-hop"', ids);
-    }
-    fs.appendFileSync('song_id.csv', ids, 'utf-8');
-  }, function(err) {
-    console.error(err);
-  });
-}
 }
 
 // Search tracks by genre and retrieve the track IDs
