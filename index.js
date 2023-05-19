@@ -434,11 +434,6 @@ app.get("/pickTags", hasSession, async (req, res) => {
     searchQuery: searchQuery,
   });
 });
-
-app.post("/updateTags", (req, res) => {
-  const tags = req.body.tags; // Array of selected tags
-  const actions = req.body.actions; // Array of corresponding actions for each tag
-}
         
 app.post("/resetTags", hasSession, (req, res) => {
   // Reset the pickedTags and blacklistedTags arrays in the session object
