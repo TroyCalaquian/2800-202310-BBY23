@@ -97,6 +97,18 @@ async function getTracks() {
 //     console.error(err);
 //   });
 
+  let ids = ''
+  spotifyAPI.searchTracks('genre:hip-hop', {limit, offset})
+  .then(function(data) {
+    for(i =0; i <  data.body.tracks.items.length; i++){
+       ids += data.body.tracks.items[i].id + '\n'
+      //  var csvString = Object.values(ids) + '\n'
+       console.log('Search by "Hip-hop"', ids);
+    }
+    // fs.appendFileSync('song_id.csv', ids, 'utf-8');
+  }, function(err) {
+    console.error(err);
+  });
 }
 
 // Search tracks by genre and retrieve the track IDs
