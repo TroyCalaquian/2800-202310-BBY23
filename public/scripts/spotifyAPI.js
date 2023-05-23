@@ -12,14 +12,20 @@ const spotifyAPI = new SpotifyWebApi({
   clientSecret: spotify_client_secret,
 });
 
+// Function that calls for a API token
 async function getAccessToken() {
-    if (!spotifyAPI.getAccessToken()) {
-      const sData = await spotifyAPI.clientCredentialsGrant();
-      const accessToken = sData.body['access_token'];
-      spotifyAPI.setAccessToken(accessToken);
-    }
+  if (!spotifyAPI.getAccessToken()) {
+    const sData = await spotifyAPI.clientCredentialsGrant();
+    const accessToken = sData.body['access_token'];
+    spotifyAPI.setAccessToken(accessToken);
   }
+}
 
+/** Gets the details for each song in a playlist.
+ * 
+ * @param {*} playlistId Playlist ID for playlist to get
+ * @returns 
+ */
 async function getTracksFromPlayList(playlistId) {
   try {
     const response = await spotifyAPI.getPlaylistTracks(playlistId);
@@ -27,13 +33,13 @@ async function getTracksFromPlayList(playlistId) {
 
     const songsArray = []; // Create an empty array to store the entries
 
-    // const songArtists = "";
     tracks.forEach((track, index) => {
-      const { name, artists, external_urls } = track.track;
+      const { name, artists, external_urls, album } = track.track;
       const songUrlLocal = external_urls.spotify;
-
-      const artistNamesL = artists.map(artist => artist.name).join(', ');
-      var jsonParsed = {songName: name, artists: artistNamesL, songURL: songUrlLocal, imageURL: "https://dummyimage.com/500x500/000/fff&text=Record+Image" };
+      const artistNamesL = artists.map(artist => artist.name).join('& ');
+    
+      const imageURLLocal = album.images.length > 0 ? album.images[0].url : "https://dummyimage.com/500x500/000/fff&text=Record+Image";
+      var jsonParsed = {songName: name, artists: artistNamesL, songURL: songUrlLocal, imageURL: imageURLLocal };
       songsArray.push(jsonParsed); // Save each entry to the result array
     });
 
@@ -43,7 +49,17 @@ async function getTracksFromPlayList(playlistId) {
   }
 }
 
-const fs = require('fs');
+async function getPlaylistName(playlistID) {
+  try {
+    const response = await spotifyAPI.getPlaylist(playlistID);
+    const playlistName = response.body.name;
+    return playlistName;
+  } catch (error) {
+    console.log('Error retrieving playlist name:', error);
+    return null;
+  }
+}
+
 
 async function getSongDetails(songCode) {
   const response = await spotifyAPI.getAudioFeaturesForTrack(songCode);
@@ -69,46 +85,69 @@ async function getSongDetails(songCode) {
     valence: audioFeatures.valence,
     tempo: audioFeatures.tempo,
   };
-  // Store data scraped from Spotify in a JSON object
-//   console.log("Stringify extractedData: " + JSON.stringify(extractedData, null, 2));
-
-  // Generate CSV string
   const csvString = Object.values(extractedData).join(',') + '\n';
-
-  // Save CSV string to a file
-  fs.appendFileSync('song_details.csv', csvString, 'utf8');
-
-  console.log('Data saved to song_details.csv');
+  // fs.appendFileSync('song_details.csv', csvString, 'utf8');
 };
 
-async function getTracks() {
-//   let limit = 50
-//   let  offset = 10
-//   let ids = ''
-//   spotifyAPI.searchTracks('genre:hip-hop', {limit, offset})
-//   .then(function(data) {
-//     for(i =0; i <  data.body.tracks.items.length; i++){
-//        ids += data.body.tracks.items[i].id + '\n'
-//       //  var csvString = Object.values(ids) + '\n'
-//        console.log('Search by "Hip-hop"', ids);
-//     }
-//     fs.appendFileSync('song_id.csv', ids, 'utf-8');
-//   }, function(err) {
-//     console.error(err);
-//   });
+const fs = require('fs');
+const csv = require('csv-parser');
 
-  let ids = ''
-  spotifyAPI.searchTracks('genre:hip-hop', {limit, offset})
-  .then(function(data) {
-    for(i =0; i <  data.body.tracks.items.length; i++){
-       ids += data.body.tracks.items[i].id + '\n'
-      //  var csvString = Object.values(ids) + '\n'
-       console.log('Search by "Hip-hop"', ids);
-    }
-    // fs.appendFileSync('song_id.csv', ids, 'utf-8');
-  }, function(err) {
-    console.error(err);
-  });
+var printAt = 0;
+
+// function readCSVWithDelay(csvFilePath) {
+//   const rows = [];
+//   fs.createReadStream(csvFilePath)
+//     .pipe(csv())
+//     .on('data', (row) => {
+//       rows.push(row);
+//     })
+//     .on('end', () => {
+//       printRowsWithDelay(rows);
+//     });
+// }
+
+// function printRowsWithDelay(rows) {
+//   let delay = 0;
+//   for (let i = 0; i < rows.length; i++) {
+//     setTimeout(async () => {
+//       await getAccessToken();
+//       const songID = rows[i].song_ID; // Replace "song_ID" with the actual property name
+//       console.log(songID);
+//       getSongDetails(songID)
+//     }, delay);
+//     delay += 3000; // 30-second delay
+//   }
+// }
+const csvFilePath = 'C:\\Users\\MaxwellV\\Desktop\\song_id.csv';
+// readCSVWithDelay(csvFilePath);
+
+async function getTracks() {
+  // let limit = 50
+  // let  offset = 10
+  // let ids = ''
+  // spotifyAPI.searchTracks('genre:hip-hop', {limit, offset})
+  // .then(function(data) {
+  //   for(i =0; i <  data.body.tracks.items.length; i++){
+  //      ids += data.body.tracks.items[i].id + '\n'
+  //     //  var csvString = Object.values(ids) + '\n'
+  //      console.log('Search by "Hip-hop"', ids);
+  //   }
+  //   fs.appendFileSync('song_id.csv', ids, 'utf-8');
+  // }, function(err) {
+  //   console.error(err);
+  // });
+
+  // spotifyAPI.searchTracks('genre:hip-hop', {limit, offset})
+  // .then(function(data) {
+  //   for(i =0; i <  data.body.tracks.items.length; i++){
+  //      ids += data.body.tracks.items[i].id + '\n'
+  //     //  var csvString = Object.values(ids) + '\n'
+  //      console.log('Search by "Hip-hop"', ids);
+  //   }
+  //   // fs.appendFileSync('song_id.csv', ids, 'utf-8');
+  // }, function(err) {
+  //   console.error(err);
+  // });
 }
 
 // Search tracks by genre and retrieve the track IDs
@@ -117,33 +156,33 @@ async function getTracks() {
 //   const limit = 1; // Adjust the number of tracks per request as needed
 //   let offset = 0;
 //   let total = 1; // Start with a value that exceeds the limit
-
+// 
 //   const trackIds = [];
-
+// 
 //   while (offset < total) {
 //     const data = await spotifyAPI.searchTracks(`genre:${genre}`, { limit, offset });
 //     const tracks = data.body.tracks;
-
+// 
 //     total = tracks.total;
 //     offset += limit;
-
+// 
 //     for (const track of tracks.items) {
 //       trackIds.push(track.id);
 //     }
 //   }
-
+// 
 //   return trackIds;
 // }
-
+// 
 // Usage example
 // async function main() {
 //   await getAccessToken();
-
+// 
 //   const genre = 'hip-hop';
 //   const trackIds = await searchTracksByGenre(genre);
-
+// 
 //   console.log("yes seirrr" + trackIds);
 // }
 
 // Export the functions or the entire Spotify API module
-module.exports = { getTracks, getSongDetails, getTracksFromPlayList, spotifyAPI, getAccessToken };
+module.exports = { getTracks, getSongDetails, getTracksFromPlayList, spotifyAPI, getAccessToken, getPlaylistName };
