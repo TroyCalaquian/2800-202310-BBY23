@@ -30,7 +30,7 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration);
 
 /* Linked JS file's functions */
-const { getTracks, getSongDetails, getTracksFromPlayList, spotifyAPI, getAccessToken } = require('./public/scripts/spotifyAPI.js');
+const { getTracks, getSongDetails, getTracksFromPlayList, spotifyAPI, getAccessToken, getPlaylistName } = require('./public/scripts/spotifyAPI.js');
 require("./utils.js");
 
 /* Node Server Setups */
@@ -91,66 +91,36 @@ function hasSession(req, res, next) {
   }
 }
 
-const fs = require('fs');
-const csv = require('csv-parser');
-
-var printAt = 0;
-
-function readCSVWithDelay(csvFilePath) {
-  const rows = [];
-  fs.createReadStream(csvFilePath)
-    .pipe(csv())
-    .on('data', (row) => {
-      rows.push(row);
-    })
-    .on('end', () => {
-      printRowsWithDelay(rows);
-    });
-}
-
-function printRowsWithDelay(rows) {
-  let delay = 0;
-  for (let i = 0; i < rows.length; i++) {
-    setTimeout(async () => {
-      await getAccessToken();
-      const songID = rows[i].song_ID; // Replace "song_ID" with the actual property name
-      console.log(songID);
-      getSongDetails(songID)
-    }, delay);
-    delay += 3000; // 30-second delay
-  }
-}
-
-const csvFilePath = 'C:\\Users\\MaxwellV\\Desktop\\song_id.csv';
-// const csvFilePath = 'C:\\Users\\MaxwellV\\Documents\\SoundScopeWorking\\2800-202310-BBY23\\song_id.csv';
-
-// readCSVWithDelay(csvFilePath);
-
-
 app.get('/spotify', async (req, res) => {
   try {
     await getAccessToken();
 
-    res.redirect("success");
+    res.redirect("playlist");
   } catch (error) {
     console.error('Error:', error);
     res.status(500).json({ error: 'An error occurred' });
   }
 });
 
-app.get('/success', async (req, res) => {
+app.get('/playlist', async (req, res) => {
   await getAccessToken();
-  const tracksDetails = await getTracksFromPlayList(playListCodeLocal);
-  const songDetails = await getSongDetails(songCodeLocal);
-  await getTracks();
 
-  if (!Array.isArray(tracksDetails)) {
-    console.log('trackDetails is not an array @ /success');
+  // Get playlistID from URL
+  const playlistID = req.query.playlistID;
+  
+  // Prints ID if it exists, TESTING PRINT
+  if (playlistID) {
+    console.log('Playlist ID:', playlistID);
   }
-  // console.log("Analysis" + getAudioAnalysisForTrack)
-  res.render('success', { inputArray: tracksDetails, playlistCode: playListCodeLocal, 
-                          songObject: songDetails, songCode: songCodeLocal });
+  
+  // Gets data if playlistID exists, sets to null if not
+  const tracksDetails = playlistID ? await getTracksFromPlayList(playlistID) : null;
+  const playlistName = playlistID ? await getPlaylistName(playlistID) : null;
+
+  // Render success, it prints nothing if parameters are null
+  res.render('success', { inputArray: tracksDetails, playlistCode: playlistName });
 });
+
 
 app.get('/error', (req,res) => {
   res.render("error");
