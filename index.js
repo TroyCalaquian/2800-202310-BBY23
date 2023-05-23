@@ -112,7 +112,7 @@ function printRowsWithDelay(rows) {
       console.log(songID);
       getSongDetails(songID)
     }, delay);
-    delay += 3000; // 30-second delay
+    delay += 10000; // 30-second delay
   }
 }
 
