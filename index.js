@@ -31,6 +31,7 @@ const openai = new OpenAIApi(configuration);
 
 /* Linked JS file's functions */
 const { getTracks, getSongDetails, getTracksFromPlayList, spotifyAPI, getAccessToken } = require('./public/scripts/spotifyAPI.js');
+const {main} = require('./AI.js')
 require("./utils.js");
 
 /* Node Server Setups */
@@ -137,6 +138,7 @@ app.get('/success', async (req, res) => {
   const tracksDetails = await getTracksFromPlayList(playListCodeLocal);
   const songDetails = await getSongDetails(songCodeLocal);
   await getTracks();
+  main()
 
   if (!Array.isArray(tracksDetails)) {
     console.log('trackDetails is not an array @ /success');
@@ -421,7 +423,7 @@ app.get("/pickTags", hasSession, async (req, res) => {
 app.post("/updateTags", (req, res) => {
   const tags = req.body.tags; // Array of selected tags
   const actions = req.body.actions; // Array of corresponding actions for each tag
-}
+})
         
 app.post("/resetTags", hasSession, (req, res) => {
   // Reset the pickedTags and blacklistedTags arrays in the session object
