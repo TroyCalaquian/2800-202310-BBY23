@@ -39,4 +39,5 @@ function sendToAI() {
   
   const url = `/aiData?songIDs=${encodeURIComponent(JSON.stringify(songIDArray))}`;
   window.location.href = url;
+  return(songIDArray)
 }
