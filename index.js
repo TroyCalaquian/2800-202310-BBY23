@@ -30,7 +30,7 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration);
 
 /* Linked JS file's functions */
-const { getTracks, getSongDetails, getTracksFromPlayList, spotifyAPI, getAccessToken, getPlaylistName } = require('./public/scripts/spotifyAPI.js');
+const { getAccessToken, getTracksFromSongIDs, getTracksFromPlayList, getPlaylistName, parseUserInput, getTracks } = require('./public/scripts/spotifyAPI.js');
 require("./utils.js");
 
 /* Node Server Setups */
@@ -57,8 +57,6 @@ const playlistCollection = database
 const redirectURI = 'http://localhost:3000/callback';
 const successRedirect = '/success';
 const errorRedirect = '/error';
-const playListCodeLocal = "6RcPwqOPVVyU3H9sRxJOrR"; // To be replace w/ user inputs
-const songCodeLocal = "3F5CgOj3wFlRv51JsHbxhe"; // To be replaces w/ user inputs
 
 var mongoStore = MongoStore.create({
   mongoUrl: `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/?retryWrites=true&w=majority`,
@@ -91,6 +89,19 @@ function hasSession(req, res, next) {
   }
 }
 
+app.get('/inputSong', async (req, res) => {
+  res.render("userInput");
+})
+
+app.get('/aiData', async (req, res) => {
+  const songIdArray = JSON.parse(req.query.songIDs || '[]');
+  const parsedData = await parseUserInput(songIdArray);
+
+  // Parsed data is both printed, and passed to page for display. Should go to the AI instead.
+  console.log("aiData: " + parsedData + "\n");
+  res.render('aiData', { parsedData });
+});
+
 app.get('/spotify', async (req, res) => {
   try {
     await getAccessToken();
@@ -105,22 +116,14 @@ app.get('/spotify', async (req, res) => {
 app.get('/playlist', async (req, res) => {
   await getAccessToken();
 
-  // Get playlistID from URL
-  const playlistID = req.query.playlistID;
+  // Temp standin, array to be created by AI
+  const tempArray = ["3F5CgOj3wFlRv51JsHbxhe", "5e9TFTbltYBg2xThimr0rU"];
   
-  // Prints ID if it exists, TESTING PRINT
-  if (playlistID) {
-    console.log('Playlist ID:', playlistID);
-  }
-  
-  // Gets data if playlistID exists, sets to null if not
-  const tracksDetails = playlistID ? await getTracksFromPlayList(playlistID) : null;
-  const playlistName = playlistID ? await getPlaylistName(playlistID) : null;
+  // Gets array of song details to display on page
+  const tracksDetails = await getTracksFromSongIDs(tempArray);
 
-  // Render success, it prints nothing if parameters are null
-  res.render('success', { inputArray: tracksDetails, playlistCode: playlistName });
+  res.render('success', { inputArray: tracksDetails });
 });
-
 
 app.get('/error', (req,res) => {
   res.render("error");
@@ -502,8 +505,6 @@ app.post("/editUsername", hasSession, async (req, res) => {
   req.session.name = username; // updating session with new username
   res.redirect("/profile");
 });
-
-
 
 app.post("/editPhoto", upload.single("profilePicture"), async (req, res) => {
   if (!req.file || !req.file.mimetype.startsWith("image/")) {
