@@ -10,13 +10,13 @@
   <form id="urlForm">
     <label for="url">Enter Spotify Song URL:</label>
     <input type="text" id="url" name="url" required>
-    <button type="submit">Check</button>
+    <button type="submit">Add Song</button>
   </form>
 
   <ul id="inputSongIDs">
   </ul>
   
-  <button onclick="printSongIDs()">Print Song IDs</button>
+  <button onclick="sendToAI()">Send songs to AI</button>
 
 <%- include('./templates/footer') %>
 

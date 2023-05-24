@@ -122,7 +122,7 @@ app.get('/spotify', async (req, res) => {
 app.get("/playlist", async (req, res) => {
   await getAccessToken();
 
-  // Temp standin, array to be created by AI
+  // Testing array, to be replaced by AI giving array
   const tempArray = ["3F5CgOj3wFlRv51JsHbxhe", "5e9TFTbltYBg2xThimr0rU"];
   
   // Gets array of song details to display on page
@@ -419,111 +419,8 @@ app.get("/profile", hasSession, async (req, res) => {
   }
 });
 
-app.get("/pickTags", hasSession, async (req, res) => {
-  req.session.pickedTags = req.session.pickedTags || [];
-  req.session.blacklistedTags = req.session.blacklistedTags || [];
-
-  const genreCollection = database.db("genres").collection("genres");
-  var collection = await genreCollection
-    .find({})
-    .project({ genres: 1 })
-    .toArray();
-  var tags = collection[0].genres;
-
-  const searchQuery = req.query.search || "";
-
-  if (searchQuery === "RickRoll") {
-    // Redirect to the Rick Astley's "Never Gonna Give You Up" video on YouTube
-    return res.redirect("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
-  }
-
-  // Filter the tags based on the search query
-  const filteredTags = tags.filter((tag) =>
-    tag.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  res.render("pickTags", {
-    tags: filteredTags,
-    pickedTags: req.session.pickedTags,
-    blacklistedTags: req.session.blacklistedTags,
-    searchQuery: searchQuery,
-  });
-});
-
-app.post("/resetTags", hasSession, (req, res) => {
-  // Reset the pickedTags and blacklistedTags arrays in the session object
-  req.session.pickedTags = [];
-  req.session.blacklistedTags = [];
-
-  req.query.search = "";
-
-  res.redirect("/pickTags");
-});
-
-app.post("/updateTags", hasSession, genreMulter.array("tags"), (req, res) => {
-  const tags = req.body.tags; // Array of selected tags
-  const actions = req.body.actions; // Array of corresponding actions for each tag
-
-  // Retrieve the pickedTags and blacklistedTags arrays from the session object
-  let pickedTags = [];
-  let blacklistedTags = [];
-
-  // TODO: Add check for whether the user already inputted a playlist
-  if (typeof tags === "undefined" || tags.length == 0) {
-    // No tags were selected
-    res.redirect("/confirmTags");
-    return;
-  }
-
-  for (let i = 0; i < tags.length; i++) {
-    var tag = tags[i];
-    var action = actions[i];
-
-    // Handle the selected action for each tag
-    if (action === "add") {
-      pickedTags.push(tag); // Add the tag to the pickedTags array
-    } else if (action === "blacklist") {
-      blacklistedTags.push(tag); // Add the tag to the blacklistedTags array
-    } else if (action === "blank") {
-      // Remove the tag from both arrays, if it exists
-      // Note: this might not be needed later
-      pickedTags = pickedTags.filter((pickedTag) => pickedTag !== tag);
-      blacklistedTags = blacklistedTags.filter(
-        (blacklistedTag) => blacklistedTag !== tag
-      );
-    }
-  }
-
-  // Store the pickedTags and blacklistedTags arrays in the session object
-  req.session.pickedTags = pickedTags;
-  req.session.blacklistedTags = blacklistedTags;
-
-  // Redirect back to the /pickTags page or any other desired page
-  res.redirect("/confirmTags");
-});
-
-app.get("/confirmTags", hasSession, (req, res) => {
-  console.log("Picked tags length: " + req.session.pickedTags.length);
-  console.log("Blacklisted tags length: " + req.session.blacklistedTags.length);
-  res.render("confirmTags", {
-    pickedTags: req.session.pickedTags,
-    blacklistedTags: req.session.blacklistedTags,
-  });
-});
-
-app.post("/confirmChoices", hasSession, async (req, res) => {
-  // TODO: Put AI stuff here
-  res.redirect("/results");
-});
-
-app.get("/results", hasSession, (req, res) => {
-  console.log("PickedTags: " + req.session.pickedTags);
-  console.log("BlacklistedTags: " + req.session.blacklistedTags);
-  res.render("results");
-});
-
 app.get("/addMusic", hasSession, (req, res) => {
-  res.render("addMusic");
+  res.render("userInput");
 });
 
 app.post("/editUsername", hasSession, async (req, res) => {

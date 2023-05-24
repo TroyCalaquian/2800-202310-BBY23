@@ -4,11 +4,22 @@
 
 <%- include('./templates/header') %>
 
-<h1 class="centered">This is where the user's input details is shared.</h1>
-<h2 class="centered">CSV is printed to console.</h2>
+<br><h1 class="centered">Pretend the AI did its magic, and created a playlist</h1>
+<br><br>
+<button id="redirectButton" class="centered">Open Playlist</button>
+
 
 <script>
   console.log(`CSV Data:\n<%- parsedData %>`);
+
+  // Get the button element
+  const redirectButton = document.getElementById("redirectButton");
+
+  // Add a click event listener to the button
+  redirectButton.addEventListener("click", () => {
+    // Change the URL to "/playlist"
+    window.location.href = "/playlist";
+  });
 </script>
 
 <%- include('./templates/footer') %>

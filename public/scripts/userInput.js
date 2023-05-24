@@ -27,7 +27,7 @@ document.getElementById('urlForm').addEventListener('submit', function(event) {
   urlInput.value = '';
 });
 
-function printSongIDs() {
+function sendToAI() {
   const inputSongIDs = document.getElementById('inputSongIDs');
   const songIDs = inputSongIDs.getElementsByTagName('li');
   const songIDArray = [];
