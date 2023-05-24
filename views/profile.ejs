@@ -18,8 +18,7 @@
 
 <!-- These values to be converted to read from database. -->
 <% const username = "currentUser" %> <% const profileLink =
-"https://dummyimage.com/200x200/000/fff" %> <% const songs = ['song1', 'song2',
-'song3']; %>
+"https://dummyimage.com/200x200/000/fff" %> <% const songs = user.playlists; %>
 
 <!-- Assembly of pic & username -->
 <!-- Assembly of pic & username -->
@@ -64,11 +63,15 @@
 <br />
 <div id="userPlaylists">
   <h3><%- userName %>'s Playlists</h3>
+  <% if (songs.length === 0) {%>
+  <p>This user has no playlists.</p>
+  <% } else { %>
   <ul class="list-group">
     <% songs.forEach(function(song) { %>
     <li class="list-group-item"><%= song %></li>
     <% }); %>
   </ul>
+  <% } %>
 </div>
 
 <%- include('./templates/footer') %>
