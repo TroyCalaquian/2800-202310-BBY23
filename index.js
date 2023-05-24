@@ -84,9 +84,15 @@ app.use(
   })
 );
 
-app.use(function (req, res, next) {
+app.use(async function (req, res, next) {
   const userLoginStatus = req.session.authenticated || false;
   res.locals.userLoginStatus = userLoginStatus;
+  if (res.locals.userLoginStatus) {
+    const user = await userCollection.findOne({ username: req.session.name });
+     res.locals.user = user;
+  } else {
+    res.locals.user = null;
+  }
   next();
 });
 
@@ -240,7 +246,7 @@ app.post("/loggingin", async (req, res) => {
   }
 });
 
-app.get("/loggedin", hasSession, (req, res) => {
+app.get("/loggedin", (req, res) => {
   res.redirect("/welcome");
 });
 
@@ -402,10 +408,8 @@ app.post("/securityQuestion", async (req, res) => {
 
 app.get("/logout", (req, res) => {
   req.session.destroy();
-  var sessionState = false;
-  var username = "";
 
-  res.render("welcome", { isLoggedIn: sessionState, userName: username });
+  return res.redirect("/");
 });
 
 app.get("/home", hasSession, (req, res) => {
