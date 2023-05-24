@@ -6,8 +6,24 @@
 
 <br>
 <h1>Sorry, page "<span id="badInput">Page</span>" does not exist.</h1>
+<div class="center">
+  <button id="goBackButton">Go back</button>
+  <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">
+    <button>See how our AI works!</button>
+  </a>
+</div>
 
 <%- include('./templates/footer') %>
+
+<script>
+  // Add event listener to the button
+  document.getElementById("goBackButton").addEventListener("click", goBack);
+
+  // Function to go back
+  function goBack() {
+    history.back();
+  }
+</script>
 
 <script src="../scripts/displayErrorURL.js"></script>
 <%- include('./templates/htmlClose') %>
