@@ -31,7 +31,7 @@ const openai = new OpenAIApi(configuration);
 
 /* Linked JS file's functions */
 const { main, getTracks, getSongDetails, getTracksFromPlayList, spotifyAPI, getAccessToken } = require('./public/scripts/spotifyAPI.js');
-// const {main} = require('./AI.js')
+const {runpyfile} = require('./AI.js')
 require("./utils.js");
 
 /* Node Server Setups */
