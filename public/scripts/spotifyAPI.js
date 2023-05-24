@@ -83,21 +83,9 @@ async function getSongDetails(songCode) {
 
 async function getTracks() {
 
-  // let ids = ''
-  // spotifyAPI.searchTracks('genre:hip-hop', {limit, offset})
-  // .then(function(data) {
-  //   for(i =0; i <  data.body.tracks.items.length; i++){
-  //      ids += data.body.tracks.items[i].id + '\n'
-  //     //  var csvString = Object.values(ids) + '\n'
-  //      console.log('Search by "Hip-hop"', ids);
-  //   }
-  //   fs.appendFileSync('song_id.csv', ids, 'utf-8');
-  // }, function(err) {
-  //   console.error(err);
-  // });
 
   var ids = ''
-  for(i = 0; i <= 400; i++){
+  for(i = 0; i <= 1; i++){
     let limit = 50
     let  offset = i
     spotifyAPI.searchTracks('genre:dance', {limit, offset})
@@ -108,7 +96,7 @@ async function getTracks() {
         //  var csvString = Object.values(ids) + '\n'
         //  console.log('Search by "Hip-hop"', ids);
       }
-      fs.appendFileSync('song_id.csv', ids, 'utf-8');
+      // fs.appendFileSync('song_id.csv', ids, 'utf-8');
     }, function(err) {
       console.error(err);
     });
@@ -116,29 +104,6 @@ async function getTracks() {
   
 }
 
-// Search tracks by genre and retrieve the track IDs
-// async function searchTracksByGenre(genre) {
-//   console.log("gebnre searching")
-//   const limit = 1; // Adjust the number of tracks per request as needed
-//   let offset = 0;
-//   let total = 1; // Start with a value that exceeds the limit
-
-//   const trackIds = [];
-
-//   while (offset < total) {
-//     const data = await spotifyAPI.searchTracks(`genre:${genre}`, { limit, offset });
-//     const tracks = data.body.tracks;
-
-//     total = tracks.total;
-//     offset += limit;
-
-//     for (const track of tracks.items) {
-//       trackIds.push(track.id);
-//     }
-//   }
-
-//   return trackIds;
-// }
 
 // Usage example
 async function main() {
