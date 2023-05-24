@@ -27,58 +27,10 @@ button.centered {
     display: flex;
     align-items: center;
 }
-
-.login-form{
-    /* justify-content: center; */
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    /* background-color: aquamarine; */
-    /* padding-bottom: 15px; */
-    position: fixed;
-    padding-top: 5%;
-    left: 50%;
-    transform: translate( -50%);
-    height: 70%;
-    width: 50%;
+.header-button{
+    margin-left: 2.5px;
+    margin-right: 2.5px;
 }
-.login-form-text{
-    justify-self: flex-start;
-    justify-content: center;
-    text-align: center;
-    display: grid;
-}
-.login-form-info{
-    padding: 10px;
-    justify-content: center;
-    text-align: center;
-    display: grid;
-}
-.login-form-info-input{
-    width: 120%;
-    margin-bottom: 4px;
-    margin-top: 4px;
-    justify-content: center;
-    align-items: center;
-    justify-self: center;
-}
-.signup-form{
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    padding-top: 5%;
-}
-.signup-form-info{
-    padding: 10px;
-    justify-content: center;
-    text-align: center;
-    display: grid;
-}
-.signup-form-info-input{
-    width: 100%;
-    margin-bottom: 4px;
-    margin-top: 4px;
-    justify-content: center;
-    align-items: center;
-    justify-self: center;
+.active-button{
+    background-color: lightgrey;
 }
