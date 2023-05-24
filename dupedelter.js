@@ -1,5 +1,5 @@
 const fs = require('fs');
-const filePath = 'song_id.csv';
+const filePath = 'song_details.csv';
 
 // Read the file
 fs.readFile(filePath, 'utf8', (err, data) => {
