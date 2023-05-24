@@ -97,10 +97,10 @@ async function getTracks() {
   // });
 
   var ids = ''
-  for(i = 201; i <= 400; i++){
+  for(i = 0; i <= 400; i++){
     let limit = 50
     let  offset = i
-    spotifyAPI.searchTracks('genre:pop', {limit, offset})
+    spotifyAPI.searchTracks('genre:dance', {limit, offset})
     .then(function(data) {
       console.log(data.body.tracks.items.length)
       for(i =0; i <  data.body.tracks.items.length; i++){
