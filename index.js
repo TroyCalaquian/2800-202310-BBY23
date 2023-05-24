@@ -1,36 +1,43 @@
-
 /* Module requirements */
-const express     = require("express");
-const session     = require("express-session");
-const multer      = require("multer");
+const express = require("express");
+const session = require("express-session");
+const multer = require("multer");
 const genreMulter = multer();
-const MongoStore  = require("connect-mongo");
-const Joi         = require("joi");
-const bcrypt      = require("bcrypt");
+const MongoStore = require("connect-mongo");
+const Joi = require("joi");
+const bcrypt = require("bcrypt");
+const fs = require("fs");
 
 /* Multer Values */
-const storage     = multer.memoryStorage()
-const upload      = multer({ storage: storage });
-const sharp       = require("sharp");
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
+const sharp = require("sharp");
 
 const { Configuration, OpenAIApi } = require("openai");
 require("dotenv").config();
 
 /* Required Values */
-const app        = express();
-const port       = 3000;
+const app = express();
+const port = 3000;
 const expireTime = 60 * 60 * 1000;
 const saltRounds = 12;
-var pickedTags      = [];
+var pickedTags = [];
 var blacklistedTags = [];
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
-})
+});
 
 const openai = new OpenAIApi(configuration);
 
 /* Linked JS file's functions */
-const { getTracks, getSongDetails, getTracksFromPlayList, spotifyAPI, getAccessToken, getPlaylistName } = require('./public/scripts/spotifyAPI.js');
+const {
+  getTracks,
+  getSongDetails,
+  getTracksFromPlayList,
+  spotifyAPI,
+  getAccessToken,
+  getPlaylistName,
+} = require("./public/scripts/spotifyAPI.js");
 require("./utils.js");
 
 /* Node Server Setups */
@@ -54,9 +61,9 @@ const playlistCollection = database
   .collection("playlists");
 
 /* Spotify Variables */
-const redirectURI = 'http://localhost:3000/callback';
-const successRedirect = '/success';
-const errorRedirect = '/error';
+const redirectURI = "http://localhost:3000/callback";
+const successRedirect = "/success";
+const errorRedirect = "/error";
 const playListCodeLocal = "6RcPwqOPVVyU3H9sRxJOrR"; // To be replace w/ user inputs
 const songCodeLocal = "3F5CgOj3wFlRv51JsHbxhe"; // To be replaces w/ user inputs
 
@@ -77,7 +84,7 @@ app.use(
   })
 );
 
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   const userLoginStatus = req.session.authenticated || false;
   res.locals.userLoginStatus = userLoginStatus;
   next();
@@ -91,66 +98,70 @@ function hasSession(req, res, next) {
   }
 }
 
-app.get('/spotify', async (req, res) => {
+app.get("/spotify", async (req, res) => {
   try {
     await getAccessToken();
 
     res.redirect("playlist");
   } catch (error) {
-    console.error('Error:', error);
-    res.status(500).json({ error: 'An error occurred' });
+    console.error("Error:", error);
+    res.status(500).json({ error: "An error occurred" });
   }
 });
 
-app.get('/playlist', async (req, res) => {
+app.get("/playlist", async (req, res) => {
   await getAccessToken();
 
   // Get playlistID from URL
   const playlistID = req.query.playlistID;
-  
+
   // Prints ID if it exists, TESTING PRINT
   if (playlistID) {
-    console.log('Playlist ID:', playlistID);
+    console.log("Playlist ID:", playlistID);
   }
-  
+
   // Gets data if playlistID exists, sets to null if not
-  const tracksDetails = playlistID ? await getTracksFromPlayList(playlistID) : null;
+  const tracksDetails = playlistID
+    ? await getTracksFromPlayList(playlistID)
+    : null;
   const playlistName = playlistID ? await getPlaylistName(playlistID) : null;
 
   // Render success, it prints nothing if parameters are null
-  res.render('success', { inputArray: tracksDetails, playlistCode: playlistName });
+  res.render("success", {
+    inputArray: tracksDetails,
+    playlistCode: playlistName,
+  });
 });
 
-
-app.get('/error', (req,res) => {
+app.get("/error", (req, res) => {
   res.render("error");
 });
 
-app.get('/', (req,res) => {
-    var sessionState = req.session.authenticated;
-    var username = req.session.name;
+app.get("/", (req, res) => {
+  var sessionState = req.session.authenticated;
+  var username = req.session.name;
 
   res.render("welcome", { isLoggedIn: sessionState, userName: username });
 });
 
-app.get('/callback', async (req, res) => {
+app.get("/callback", async (req, res) => {
   const code = req.query.code;
   console.log("/callback passed");
 
   try {
     // Exchange authorization code for access and refresh tokens
     const authOptions = {
-      url: 'https://accounts.spotify.com/api/token',
-      method: 'POST',
+      url: "https://accounts.spotify.com/api/token",
+      method: "POST",
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        "Content-Type": "application/x-www-form-urlencoded",
       },
       auth: {
         username: clientID,
         password: clientSecret,
       },
       data: querystring.stringify({
-        grant_type: 'authorization_code',
+        grant_type: "authorization_code",
         code: code,
         redirect_uri: redirectURI,
       }),
@@ -162,10 +173,10 @@ app.get('/callback', async (req, res) => {
     // Use the access token to make API requests
     // e.g., get user profile details
     const userOptions = {
-      url: 'https://api.spotify.com/v1/me',
-      method: 'GET',
+      url: "https://api.spotify.com/v1/me",
+      method: "GET",
       headers: {
-        'Authorization': `Bearer ${access_token}`,
+        Authorization: `Bearer ${access_token}`,
       },
     };
 
@@ -175,15 +186,14 @@ app.get('/callback', async (req, res) => {
     // Redirect to success page with user profile
     res.redirect(`${successRedirect}?${querystring.stringify(userProfile)}`);
   } catch (error) {
-    console.error('Error:', error.message);
+    console.error("Error:", error.message);
     // Redirect to error page
     res.redirect(errorRedirect);
   }
 });
 
-app.get('/login', (req,res) => {
-    res.render("login");
-
+app.get("/login", (req, res) => {
+  res.render("login");
 });
 
 app.post("/loggingin", async (req, res) => {
@@ -234,11 +244,11 @@ app.get("/loggedin", hasSession, (req, res) => {
   res.redirect("/welcome");
 });
 
-app.get('/signup', (req,res) => {
-   res.render("signup");
-}); 
+app.get("/signup", (req, res) => {
+  res.render("signup");
+});
 
-app.post("/submitUser", async (req, res) => {
+app.post("/submitUser", upload.single("profilePicture"), async (req, res) => {
   var username = req.body.username;
   var email = req.body.email;
   var password = req.body.password;
@@ -267,19 +277,43 @@ app.post("/submitUser", async (req, res) => {
 
   var hashedPassword = await bcrypt.hash(password, saltRounds);
 
-  await userCollection.insertOne({
-    username: username,
-    password: hashedPassword,
-    email: email,
-    Security_Question: securityQuestion,
-    Security_Question_Answer: securityAnswer,
-    user_type: "user",
-    pfp: null,
-    playlists: [],
-  });
-  console.log("Inserted user");
+  const imagePath = __dirname + "/public/pictures/DefaultPFP.jpg";
 
-  res.redirect("/welcome");
+  try {
+    // Read the image file
+    const photoData = fs.readFileSync(imagePath);
+
+    if (!photoData || photoData.length === 0) {
+      throw new Error("Empty photo data.");
+    }
+
+    // Resize the image to a maximum of 500x500 pixels
+    // This will maintain the aspect ratio of the image
+    const resizedImageData = await sharp(photoData)
+      .resize(200, 200, {
+        fit: sharp.fit.inside, // keep aspect ratio, don't crop the image
+        withoutEnlargement: true, // don't enlarge if source image size is smaller than given size
+      })
+      .toBuffer();
+
+    // Create a base64 data URL with the correct mime type
+    const base64DataUrl = `data:image/jpeg;base64,${resizedImageData.toString("base64")}`;
+    await userCollection.insertOne({
+      username: username,
+      password: hashedPassword,
+      email: email,
+      Security_Question: securityQuestion,
+      Security_Question_Answer: securityAnswer,
+      user_type: "user",
+      pfp: base64DataUrl,
+      playlists: [],
+    });
+    res.redirect("/welcome");
+  } catch (error) {
+    console.error("Failed to update photo:", error);
+    res.status(500).send("Failed to update photo.");
+  }
+  console.log("Inserted user");
 });
 
 app.get("/welcome", hasSession, (req, res) => {
@@ -294,7 +328,7 @@ app.get("/changePassword", (req, res) => {
   if (sessionState) {
     res.render("resetPassword", { sessionState: sessionState });
   } else {
-    res.render("securityQuestion", { firstEntrance: true});
+    res.render("securityQuestion", { firstEntrance: true });
   }
 });
 
@@ -332,26 +366,38 @@ app.post("/securityQuestion", async (req, res) => {
   var userNotFound = false;
   var securityans = req.body.answer;
   var useremail = req.body.email;
-  console.log("User email: "+ useremail);//-----------
-  if(useremail != undefined){
+  console.log("User email: " + useremail); //-----------
+  if (useremail != undefined) {
     req.session.email = useremail;
   }
-  console.log("Session email: "+ req.session.email);//-----------
+  console.log("Session email: " + req.session.email); //-----------
   var incorrectEmailMessage = "No user under that email exists";
   let currentUser = await userCollection.findOne({ email: req.session.email });
-  console.log("CurrentUser email: "+ currentUser);//-----------
-  console.log("entered ans " + securityans + " emails ans " + currentUser.Security_Question_Answer);
+  console.log("CurrentUser email: " + currentUser); //-----------
+  console.log(
+    "entered ans " +
+      securityans +
+      " emails ans " +
+      currentUser.Security_Question_Answer
+  );
   if (!currentUser) {
     userNotFound = true;
-    res.render("securityQuestion", {firstEntrance: false, userState: userNotFound, incorrectEmail: incorrectEmailMessage});
-  }else if (currentUser.Security_Question_Answer == securityans){
+    res.render("securityQuestion", {
+      firstEntrance: false,
+      userState: userNotFound,
+      incorrectEmail: incorrectEmailMessage,
+    });
+  } else if (currentUser.Security_Question_Answer == securityans) {
     res.render("resetPassword");
-  } 
-  else {
+  } else {
     userNotFound = false;
     var usersQuestion = currentUser.Security_Question;
-    res.render("securityQuestion", {firstEntrance: false, userState: userNotFound, securityQuestion: usersQuestion});
-  } 
+    res.render("securityQuestion", {
+      firstEntrance: false,
+      userState: userNotFound,
+      securityQuestion: usersQuestion,
+    });
+  }
 });
 
 app.get("/logout", (req, res) => {
@@ -382,7 +428,10 @@ app.get("/pickTags", hasSession, async (req, res) => {
   req.session.blacklistedTags = req.session.blacklistedTags || [];
 
   const genreCollection = database.db("genres").collection("genres");
-  var collection = await genreCollection.find({}).project({genres: 1}).toArray();
+  var collection = await genreCollection
+    .find({})
+    .project({ genres: 1 })
+    .toArray();
   var tags = collection[0].genres;
 
   const searchQuery = req.query.search || "";
@@ -404,7 +453,7 @@ app.get("/pickTags", hasSession, async (req, res) => {
     searchQuery: searchQuery,
   });
 });
-        
+
 app.post("/resetTags", hasSession, (req, res) => {
   // Reset the pickedTags and blacklistedTags arrays in the session object
   req.session.pickedTags = [];
@@ -498,12 +547,10 @@ app.post("/editUsername", hasSession, async (req, res) => {
     { username: req.session.name },
     { $set: { username: username } }
   );
-  
+
   req.session.name = username; // updating session with new username
   res.redirect("/profile");
 });
-
-
 
 app.post("/editPhoto", upload.single("profilePicture"), async (req, res) => {
   if (!req.file || !req.file.mimetype.startsWith("image/")) {
@@ -523,12 +570,14 @@ app.post("/editPhoto", upload.single("profilePicture"), async (req, res) => {
     const resizedImageData = await sharp(photoData)
       .resize(200, 200, {
         fit: sharp.fit.inside, // keep aspect ratio, don't crop the image
-        withoutEnlargement: true // don't enlarge if source image size is smaller than given size
+        withoutEnlargement: true, // don't enlarge if source image size is smaller than given size
       })
       .toBuffer();
 
     // Create a base64 data URL with the correct mime type
-    const base64DataUrl = `data:${req.file.mimetype};base64,${resizedImageData.toString('base64')}`;
+    const base64DataUrl = `data:${
+      req.file.mimetype
+    };base64,${resizedImageData.toString("base64")}`;
 
     // Update the photo field for the current user in the users collection
     await userCollection.updateOne(
