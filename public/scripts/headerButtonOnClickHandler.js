@@ -37,3 +37,12 @@ document.addEventListener("DOMContentLoaded", function() {
       });
     }
   });
+
+  document.addEventListener("DOMContentLoaded", function() {
+    var signupButton = document.getElementById("signupButton");
+    if (signupButton) {
+      signupButton.addEventListener("click", function() {
+        window.location.href = "/signup";
+      });
+    }
+  });
