@@ -30,8 +30,8 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration);
 
 /* Linked JS file's functions */
-const { getTracks, getSongDetails, getTracksFromPlayList, spotifyAPI, getAccessToken } = require('./public/scripts/spotifyAPI.js');
-const {main} = require('./AI.js')
+const { main, getTracks, getSongDetails, getTracksFromPlayList, spotifyAPI, getAccessToken } = require('./public/scripts/spotifyAPI.js');
+// const {main} = require('./AI.js')
 require("./utils.js");
 
 /* Node Server Setups */

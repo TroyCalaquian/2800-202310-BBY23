@@ -82,21 +82,7 @@ async function getSongDetails(songCode) {
 };
 
 async function getTracks() {
-//   let limit = 50
-//   let  offset = 10
-//   let ids = ''
-//   spotifyAPI.searchTracks('genre:hip-hop', {limit, offset})
-//   .then(function(data) {
-//     for(i =0; i <  data.body.tracks.items.length; i++){
-//        ids += data.body.tracks.items[i].id + '\n'
-//       //  var csvString = Object.values(ids) + '\n'
-//        console.log('Search by "Hip-hop"', ids);
-//     }
-//     fs.appendFileSync('song_id.csv', ids, 'utf-8');
-//   }, function(err) {
-//     console.error(err);
-//   });
-// 
+
   // let ids = ''
   // spotifyAPI.searchTracks('genre:hip-hop', {limit, offset})
   // .then(function(data) {
@@ -105,10 +91,29 @@ async function getTracks() {
   //     //  var csvString = Object.values(ids) + '\n'
   //      console.log('Search by "Hip-hop"', ids);
   //   }
-  //   // fs.appendFileSync('song_id.csv', ids, 'utf-8');
+  //   fs.appendFileSync('song_id.csv', ids, 'utf-8');
   // }, function(err) {
   //   console.error(err);
   // });
+
+  var ids = ''
+  for(i = 201; i <= 400; i++){
+    let limit = 50
+    let  offset = i
+    spotifyAPI.searchTracks('genre:pop', {limit, offset})
+    .then(function(data) {
+      console.log(data.body.tracks.items.length)
+      for(i =0; i <  data.body.tracks.items.length; i++){
+         ids += data.body.tracks.items[i].id + '\n'
+        //  var csvString = Object.values(ids) + '\n'
+        //  console.log('Search by "Hip-hop"', ids);
+      }
+      fs.appendFileSync('song_id.csv', ids, 'utf-8');
+    }, function(err) {
+      console.error(err);
+    });
+  }
+  
 }
 
 // Search tracks by genre and retrieve the track IDs
@@ -136,14 +141,17 @@ async function getTracks() {
 // }
 
 // Usage example
-// async function main() {
-//   await getAccessToken();
+async function main() {
+  await getAccessToken();
 
-//   const genre = 'hip-hop';
-//   const trackIds = await searchTracksByGenre(genre);
+  // const genre = 'hip-hop';
+  // const trackIds = await searchTracksByGenre(genre);
 
-//   console.log("yes seirrr" + trackIds);
-// }
+  // console.log("yes seirrr" + trackIds);
+  getTracks()
+}
 
 // Export the functions or the entire Spotify API module
-module.exports = { getTracks, getSongDetails, getTracksFromPlayList, spotifyAPI, getAccessToken };
+// getAccessToken();
+// getTracks();
+module.exports = { main ,getTracks, getSongDetails, getTracksFromPlayList, spotifyAPI, getAccessToken };
