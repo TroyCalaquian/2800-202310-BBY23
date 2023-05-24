@@ -63,17 +63,24 @@
 <br />
 <div id="userPlaylists">
   <h3><%- userName %>'s Playlists</h3>
-  <% if (songs.length === 0) {%>
-  <p>You have no playlists right now!</p>
-  <button onclick="location.href='/addMusic'">Create Playlist</button>
+  <% if (songs.length === 0) { %>
+    <p>You have no playlists right now!</p>
+    <button onclick="location.href='/addMusic'">Create Playlist</button>
   <% } else { %>
-  <ul class="list-group">
-    <% songs.forEach(function(song) { %>
-    <li class="list-group-item"><%= song %></li>
-    <% }); %>
-  </ul>
+    <ul class="list-group">
+      <% songs.forEach(function(song) { %>
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <%= song %>
+          <!-- TODO: Add link to playlist page -->
+          <!-- TODO: Add delete button -->
+          <button class="btn btn-danger btn-sm deleteButton" data-song="<%= song %>">Delete</button>
+        </li>
+      <% }); %>
+    </ul>
   <% } %>
 </div>
+
+
 
 <%- include('./templates/footer') %>
 
