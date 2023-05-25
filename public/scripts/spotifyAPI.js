@@ -17,18 +17,14 @@ const spotifyAPI = new SpotifyWebApi({
 // Gets access token if one doesn't already exist.
 async function getAccessToken() {
   if (!spotifyAPI.getAccessToken()) {
-    console.log("Token Created");
     const sData = await spotifyAPI.clientCredentialsGrant();
     const accessToken = sData.body['access_token'];
     spotifyAPI.setAccessToken(accessToken);
-  } else {
-    console.log("Token Existing");
   }
 }
 
 // Gets displayable data from song ID's in an array.
 async function getTracksFromSongIDs(songIdArray) {
-  console.log("getTracksFromSongIDs Called");
   await getAccessToken();
 
   try {
@@ -58,7 +54,6 @@ async function getTracksFromSongIDs(songIdArray) {
 
 // Gets displayable data from songs in a given playlist ID.
 async function getTracksFromPlayList(playlistId) {
-  console.log("getTracksFromPlayList Called");
   getAccessToken();
   try {
     const response = await spotifyAPI.getPlaylistTracks(playlistId);
@@ -84,7 +79,6 @@ async function getTracksFromPlayList(playlistId) {
 
 // Gets playlist name from playlist ID.
 async function getPlaylistName(playlistID) {
-  console.log("getPlaylistName Called");
   getAccessToken();
   try {
     const response = await spotifyAPI.getPlaylist(playlistID);
@@ -153,7 +147,6 @@ function printCSVData(csvData) {
 
 // Parses and sets detailed info of given song to CSV file.
 async function printSongDetailsToCSV(songCode) {
-  console.log("getSongDetails Called");
   getAccessToken();
 
   const response = await spotifyAPI.getAudioFeaturesForTrack(songCode);
@@ -179,16 +172,12 @@ async function printSongDetailsToCSV(songCode) {
     valence: audioFeatures.valence,
     tempo: audioFeatures.tempo,
   };
-  // Store data scraped from Spotify in a JSON object
-  console.log("Stringify extractedData: " + JSON.stringify(extractedData, null, 2));
 
   // Generate CSV string
   const csvString = Object.values(extractedData).join(',') + '\n';
 
   // Save CSV string to a file
   fs.appendFileSync('song_details.csv', csvString, 'utf8');
-
-  console.log('Data saved to song_details.csv\n');
 };
 
 // Prints CSV file, song_id.csv in this case
@@ -211,7 +200,6 @@ function printRowsWithDelay(rows) {
     setTimeout(async () => {
       await getAccessToken();
       const songID = rows[i].song_ID; // Replace "song_ID" with the actual property name
-      console.log(songID);
       printSongDetailsToCSV(songID)
     }, delay);
     delay += 1500; // 30-second delay
