@@ -1,16 +1,25 @@
 <body>
 
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <a class="navbar-brand" href="#"><img src="https://dummyimage.com/30X30/ff0004/fff&text=S" alt="Logo Standin"></a>
+    <a class="navbar-brand" href="#" id="logoButton"><img src="https://dummyimage.com/30X30/ff0004/fff&text=S" alt="Logo Standin"></a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
       <div class="navbar-nav">
-        <button class="nav-item nav-link active" id="profileButton">Profile</a>
+        <% if (userLoginStatus) { %>
+          <button class="nav-item nav-link active" id="profileButton"><img id="pfp" src="<%- user.pfp %>" style="width: 30px; height: 30px"></a>
+        <% } else {%>
+          <button class="nav-item nav-link active" id="profileButton">Profile</a>
+        <% } %>
         <button class="nav-item nav-link active" id="homeButton">Home</a>
         <button class="nav-item nav-link active" id="addButton">Create Playlist</a>
-        <button class="nav-item nav-link active" id="logoutButton">Logout</a>
+      <% if (userLoginStatus) { %>
+        <button class="nav-item nav-link active header-button" id="logoutButton">Logout</a>
+      <%} else {%>
+        <button class="nav-item nav-link active header-button" id="loginButton">Login</a>
+        <button class="nav-item nav-link active header-button" id="signupButton">Sign Up</a>
+      <%}%>
       </div>
     </div>
   </nav>

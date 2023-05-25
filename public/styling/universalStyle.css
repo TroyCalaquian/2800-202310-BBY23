@@ -27,3 +27,10 @@ button.centered {
     display: flex;
     align-items: center;
 }
+.header-button{
+    margin-left: 2.5px;
+    margin-right: 2.5px;
+}
+.active-button{
+    background-color: lightgrey;
+}

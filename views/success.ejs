@@ -5,20 +5,15 @@
 
 <%- include('./templates/header') %>
 
-<h1 class="centered">Spotify Loaded</h1>
+<% if (inputArray && inputArray.length) { %>
+  <br><h2 class="centered">We think you'd like:</h2><br>
 
-<form onsubmit="handleFormSubmit(event)" class="centered">
-  <label for="playlistURL">Playlist URL:</label>
-  <input type="text" id="playlistURL" name="playlistURL">
-  <button type="submit">Submit</button>
-</form><br>
-<h3 class="centered"> Code: <%= playlistCode %></h3><br>
-
-<div class="card-container d-flex justify-content-start centered">
-  <% inputArray.forEach(function(entry) { %>
-    <%- include('./templates/songCard', { entry: entry }) %>
-  <% }) %>
-</div>
+  <div class="card-container d-flex justify-content-start centered">
+    <% inputArray.forEach(function(entry) { %>
+      <%- include('./templates/songCard', { entry: entry }) %>
+    <% }) %>
+  </div>
+<% } %>
 
 <script src="../scripts/spotifyUser.js"></script>
 <script src="../scripts/successJS.js"></script>
