@@ -30,6 +30,7 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration);
 
 /* Linked JS file's functions */
+const {runpyfile} = require('./AI.js')
 const { getAccessToken, getTracksFromSongIDs, getTracksFromPlayList, getPlaylistName, parseUserInput, getTracks } = require('./public/scripts/spotifyAPI.js');
 require("./utils.js");
 
@@ -98,6 +99,7 @@ function hasSession(req, res, next) {
 app.get('/inputSong', async (req, res) => {
   let addedSongs = req.query.addedSongs || [];
 
+
   if (typeof addedSongs === 'string') {
     addedSongs = addedSongs.split(','); // Split the string by commas to create an array
   }
@@ -123,8 +125,15 @@ app.get('/aiData', (req, res) => {
   }, 1500);
 });
 
-app.get("/playlist", async (req, res) => {
+app.get('/success', async (req, res) => {
+  var file = './inputtest.csv'
   await getAccessToken();
+  const songID = await runpyfile(file);
+  console.log("song_ID: " + songID);
+  // const tracksDetails = await getTracksFromPlayList(playListCodeLocal);
+  // const songDetails = await getSongDetails(songCodeLocal);
+  await getTracks();
+  // main()
 
   const recommendations = req.query.recommendations ? req.query.recommendations.split(',') : [];
 
