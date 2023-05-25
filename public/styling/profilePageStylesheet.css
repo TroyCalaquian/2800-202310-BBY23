@@ -7,3 +7,104 @@
   margin-right: 10px;
   border-radius: 50%;
 }
+
+/* Style for body and general font */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f4f4f4;
+}
+
+/* Profile display styles */
+.profileDisplay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  background-color: #fff;
+  margin: 20px auto;
+  box-shadow: 0px 0px 8px 2px rgba(0,0,0,0.1);
+}
+
+.profileDisplay img {
+  margin-bottom: 10px;
+  border-radius: 50%;
+  width: 200px;
+  height: 200px;
+  object-fit: cover;
+}
+
+.profileDisplay h1 {
+  font-size: 1.5em;
+  color: #333;
+}
+
+/* Style for forms */
+form {
+  margin: 20px auto;
+  width: 80%;
+  display: none;
+}
+
+form label {
+  font-size: 1em;
+  color: #333;
+}
+
+form input[type=text], form input[type=file] {
+  width: 100%;
+  padding: 10px;
+  margin: 5px 0;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+}
+
+form input[type=submit], form button {
+  padding: 10px 20px;
+  border-radius: 5px;
+  border: none;
+  background-color: #007BFF;
+  color: #fff;
+  cursor: pointer;
+}
+
+form input[type=submit]:hover, form button:hover {
+  background-color: #0056b3;
+}
+
+
+/* Style for buttons */
+#editUsernameButton, #editPfpButton {
+  padding: 10px 20px;
+  border-radius: 5px;
+  border: none;
+  background-color: #007BFF;
+  color: #fff;
+  cursor: pointer;
+  margin: 10px 0;
+}
+
+#editUsernameButton:hover, #editPfpButton:hover {
+  background-color: #0056b3;
+}
+
+
+/* Style for the playlist */
+#userPlaylists {
+  background-color: #fff;
+  padding: 20px;
+  margin: 20px auto;
+  box-shadow: 0px 0px 8px 2px rgba(0,0,0,0.1);
+}
+
+#userPlaylists h3 {
+  color: #333;
+}
+
+.list-group-item {
+  border: none;
+  padding: 10px 0;
+  color: #333;
+}
+
