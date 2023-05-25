@@ -186,7 +186,7 @@ async function printSongDetailsToCSV(songCode) {
   const csvString = Object.values(extractedData).join(',') + '\n';
 
   // Save CSV string to a file
-  // fs.appendFileSync('song_details.csv', csvString, 'utf8');
+  fs.appendFileSync('song_details.csv', csvString, 'utf8');
 
   console.log('Data saved to song_details.csv\n');
 };

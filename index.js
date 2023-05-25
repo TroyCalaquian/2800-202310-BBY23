@@ -138,9 +138,9 @@ app.get('/success', async (req, res) => {
   const songID = await runpyfile(file);
   console.log("song_ID: " + songID);
   // const tracksDetails = await getTracksFromPlayList(playListCodeLocal);
-  const songDetails = await getSongDetails(songCodeLocal);
+  // const songDetails = await getSongDetails(songCodeLocal);
   await getTracks();
-  main()
+  // main()
 
   // Testing array, to be replaced by AI giving array
   const tempArray = ["3F5CgOj3wFlRv51JsHbxhe", "5e9TFTbltYBg2xThimr0rU"];
