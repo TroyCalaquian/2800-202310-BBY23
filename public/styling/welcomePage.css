@@ -1,30 +1,28 @@
-.text-center {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 20px;
-    padding: 20px;
-    text-align: center;
-  }
-  
-  .text-center button {
-    padding: 10px;
+#signup-button, #login-button, #enter-button, #logout-button, #change-password-button {
+    padding: 10px 20px;
     margin: 10px;
     border-radius: 5px;
     border: none;
+    font-size: 1em;
     color: #ffffff;
-    background-color: #4CAF50;
+    background-color: #007BFF;
     cursor: pointer;
     transition: background-color 0.3s ease;
-  }
-  
-  .text-center button:hover {
-    background-color: #45A049;
-  }
-  
-  .welcome-img {
+}
+
+#signup-button:hover, #login-button:hover, #enter-button:hover, #logout-button:hover, #change-password-button:hover {
+    background-color: #0056b3;
+}
+
+.text-center button:hover {
+    background-color: #0056b3;
+}
+
+.text-center button:not(:last-child) {
+    margin-right: 15px;
+}
+
+.welcome-img {
     max-width: 100%;
     height: auto;
-  }
-  
+}
