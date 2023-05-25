@@ -1,6 +1,7 @@
 <%- include('./templates/htmlOpen') %>
 
 <!-- Stylesheets added here -->
+<link rel="stylesheet" href="../styling/userInput.css">
 
 <%- include('./templates/header') %>
 
@@ -13,9 +14,18 @@
     <button type="submit">Add Song</button>
   </form>
 
-  <ul id="inputSongIDs">
-  </ul>
+  <div class="card-container">
+    <ul>
+      <% inputArray.forEach(function(entry) { %>
+        <li>
+          <img src="<%- entry.imageURL %>" alt="">
+          <%= entry.songName %>  by <%= entry.artists %>
+        </li>
+      <% }) %>
+    </ul>
+  </div>
   
+
   <button onclick="sendToAI()">Send songs to AI</button>
 
 <%- include('./templates/footer') %>

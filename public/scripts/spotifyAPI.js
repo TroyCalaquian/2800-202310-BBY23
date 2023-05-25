@@ -97,46 +97,58 @@ async function getPlaylistName(playlistID) {
 }
 
 async function parseUserInput(songIDArray) {
-  console.log("parseUserInput Called");
   await getAccessToken();
 
-  const csvRows = [];
-  let extractedData; // Declare the extractedData object
+  const extractedData = [];
+
+  const headers = [
+    'Danceability',
+    'Energy',
+    'Key',
+    'Loudness',
+    'Mode',
+    'Speechiness',
+    'Acousticness',
+    'Instrumentalness',
+    'Liveness',
+    'Valence',
+    'Tempo',
+  ];
 
   for (const songID of songIDArray) {
     const response = await spotifyAPI.getAudioFeaturesForTrack(songID);
     const audioFeatures = response.body;
 
-    const trackInfo = await spotifyAPI.getTrack(songID);
-    const { artists, name } = trackInfo.body;
-    const artistNames = artists.map(artist => artist.name).join('&');
+    const csvData = [];
+    csvData.push(headers.join(',')); // Add header row
 
-    extractedData = { // Remove the "const" keyword here
-      songID: songID,
-      songName: name,
-      artists: artistNames,
-      danceability: audioFeatures.danceability,
-      energy: audioFeatures.energy,
-      key: audioFeatures.key,
-      loudness: audioFeatures.loudness,
-      mode: audioFeatures.mode,
-      speechiness: audioFeatures.speechiness,
-      acousticness: audioFeatures.acousticness,
-      instrumentalness: audioFeatures.instrumentalness,
-      liveness: audioFeatures.liveness,
-      valence: audioFeatures.valence,
-      tempo: audioFeatures.tempo,
-    };
+    const songData = [
+      audioFeatures.danceability.toString(),
+      audioFeatures.energy.toString(),
+      audioFeatures.key.toString(),
+      audioFeatures.loudness.toString(),
+      audioFeatures.mode.toString(),
+      audioFeatures.speechiness.toString(),
+      audioFeatures.acousticness.toString(),
+      audioFeatures.instrumentalness.toString(),
+      audioFeatures.liveness.toString(),
+      audioFeatures.valence.toString(),
+      audioFeatures.tempo.toString(),
+    ];
 
-    const csvRow = Object.values(extractedData).map(value => `"${value}"`).join(',');
-    csvRows.push(csvRow);
-    console.log("parseUserInput forEach:" + csvRow);
+    csvData.push(songData.join(',')); // Add song data row
+
+    extractedData.push(csvData.join('\n')); // Push CSV data as a string
   }
-  console.log("\n")
-  const csvHeader = Object.keys(extractedData).map(key => `"${key}"`).join(',');
-  const csvContent = [csvHeader, ...csvRows].join('\n');
 
-  return csvContent;
+  printCSVData(extractedData.join('\n\n'));
+  return extractedData;
+}
+
+// Prints data 
+function printCSVData(csvData) {
+  console.log("\nprintCSVData Prints:");
+  console.log(csvData);
 }
 
 // Parses and sets detailed info of given song to CSV file.

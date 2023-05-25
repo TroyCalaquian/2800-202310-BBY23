@@ -96,16 +96,27 @@ function hasSession(req, res, next) {
 }
 
 app.get('/inputSong', async (req, res) => {
-  res.render("userInput");
-})
+  let addedSongs = req.query.addedSongs || [];
 
-app.get('/aiData', async (req, res) => {
-  const songIdArray = JSON.parse(req.query.songIDs || '[]');
-  const parsedData = await parseUserInput(songIdArray);
+  if (typeof addedSongs === 'string') {
+    addedSongs = addedSongs.split(','); // Split the string by commas to create an array
+  }
 
-  // Parsed data is both printed, and passed to page for display. Should go to the AI instead.
-  console.log("aiData: " + parsedData + "\n");
-  res.render('aiData', { parsedData });
+  const parsedSongs = await getTracksFromSongIDs(addedSongs);
+  
+  res.render('userInput', { inputArray: parsedSongs });
+});
+
+app.get('/aiData', (req, res) => {
+  const songIdArray = req.query.addedSongs ? req.query.addedSongs.split(',') : [];
+
+  console.log("aiData Array Inputs:");
+  songIdArray.forEach((songId, index) => {
+    console.log(`User input ${index + 1} = ${songId}`);
+  });
+  parseUserInput(songIdArray);
+
+  res.render('aiData');
 });
 
 app.get('/spotify', async (req, res) => {
@@ -417,10 +428,6 @@ app.get("/profile", hasSession, async (req, res) => {
     console.error("Failed to retrieve user data:", error);
     res.status(500).send("Failed to retrieve user data.");
   }
-});
-
-app.get("/addMusic", hasSession, (req, res) => {
-  res.render("userInput");
 });
 
 app.post("/editUsername", hasSession, async (req, res) => {

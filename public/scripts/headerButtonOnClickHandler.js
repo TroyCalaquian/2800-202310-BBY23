@@ -16,7 +16,7 @@ function homeClicked() {
 document.getElementById("homeButton").onclick = homeClicked;
 
 function addClicked() {
-    window.location.href = "/addMusic";
+    window.location.href = "/inputSong";
 }
 document.getElementById("addButton").onclick = addClicked;
 
