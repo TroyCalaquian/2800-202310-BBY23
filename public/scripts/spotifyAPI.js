@@ -186,10 +186,25 @@ async function printSongDetailsToCSV(songCode) {
   const csvString = Object.values(extractedData).join(',') + '\n';
 
   // Save CSV string to a file
-  fs.appendFileSync('song_details.csv', csvString, 'utf8');
+  // fs.appendFileSync('song_details.csv', csvString, 'utf8');
 
   console.log('Data saved to song_details.csv\n');
 };
+
+
+
+
+// Usage example
+async function main() {
+  await getAccessToken();
+
+  // const genre = 'hip-hop';
+  // const trackIds = await searchTracksByGenre(genre);
+
+  // console.log("yes seirrr" + trackIds);
+  getTracks()
+}
+
 
 // Prints CSV file, song_id.csv in this case
 function readCSV(csvFilePath) {
@@ -252,3 +267,4 @@ async function getTracks() {
 
 // Share these function in this file.
 module.exports = { getAccessToken, getTracksFromSongIDs, getTracksFromPlayList, getPlaylistName, parseUserInput, getTracks };
+

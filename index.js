@@ -30,6 +30,7 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration);
 
 /* Linked JS file's functions */
+const {runpyfile} = require('./AI.js')
 const { getAccessToken, getTracksFromSongIDs, getTracksFromPlayList, getPlaylistName, parseUserInput, getTracks } = require('./public/scripts/spotifyAPI.js');
 require("./utils.js");
 
@@ -98,6 +99,16 @@ function hasSession(req, res, next) {
 app.get('/inputSong', async (req, res) => {
   let addedSongs = req.query.addedSongs || [];
 
+function printRowsWithDelay(rows) {
+  let delay = 0;
+  for (let i = 0; i < rows.length; i++) {
+    setTimeout(async () => {
+      await getAccessToken();
+      const songID = rows[i].song_ID; // Replace "song_ID" with the actual property name
+      console.log(songID);
+      getSongDetails(songID)
+    }, delay);
+    delay += 10000; // 30-second delay
   if (typeof addedSongs === 'string') {
     addedSongs = addedSongs.split(','); // Split the string by commas to create an array
   }
@@ -132,6 +143,9 @@ app.get('/spotify', async (req, res) => {
 
 app.get("/playlist", async (req, res) => {
   await getAccessToken();
+  const songDetails = await getSongDetails(songCodeLocal);
+  await getTracks();
+  main()
 
   // Testing array, to be replaced by AI giving array
   const tempArray = ["3F5CgOj3wFlRv51JsHbxhe", "5e9TFTbltYBg2xThimr0rU"];
