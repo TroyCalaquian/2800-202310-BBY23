@@ -1,6 +1,7 @@
 <%- include('./templates/htmlOpen') %>
 
 <!-- Stylesheets added here -->
+<link rel="stylesheet" href="/public/styling/welcomePage.css">
 
 <%- include('./templates/header') %>
 
@@ -8,16 +9,16 @@
 <div class="text-center">
   <% if (!isLoggedIn) { %>
     <h1 class="site-welcome-head">Welcome to SoundScope!</h2>
-      <div>Soundscope uses AI technology to help you, the user, find new music and artists when you get bored of listening to the same music all the time.</div>
-      <div>To use SoundScope, all you have to do is give us some of your favorite songs and SoundScope will then give you a playlist of new</div>
-      <div>music that we think you might like!</div>
-      <br><br><br>
-    <h2>Please signup or login</h2>
+    
+    <p>Soundscope uses AI technology to help you discover new music tailored to your taste. Tired of looping the same songs? We've got you covered!</p>
+    <p>To start exploring, sign up or log in, give us some of your favorite songs, and let SoundScope create a unique playlist just for you. Dive into the world of music like never before.</p>
+    <br><br><br>
+    <h2>Ready to start your musical journey?</h2>
     <button onclick="location.href='/signup'">Sign Up</button>
     <button onclick="location.href='/login'">Login</button>
   <% } else { %>
-    <h1>Welcome back, <%= userName %>!<br>Please select one</h1>
-    <button onclick="location.href='/home'">Enter!</button>
+    <h1>Welcome back, <%= userName %>!<br>Let's find some great music today.</h1>
+    <button onclick="location.href='/home'">Enter</button>
     <button onclick="location.href='/logout'">Logout</button>
     <button onclick="location.href='/changePassword'">Change Password</button>
   <% } %>
