@@ -6,7 +6,8 @@
 <%- include('./templates/header') %>
 
 <h1 class="centered">User input</h1>
-<br><h3>Songs:</h3>
+<br><h3>Songs:</h3><br>
+<button class="delete-all-button">Delete All Entries</button>
 
   <form id="urlForm">
     <label for="url">Enter Spotify Song URL:</label>
@@ -15,14 +16,13 @@
   </form>
 
   <div class="card-container">
-    <ul>
-      <% inputArray.forEach(function(entry) { %>
-        <li>
-          <img src="<%- entry.imageURL %>" alt="">
-          <%= entry.songName %>  by <%= entry.artists %>
-        </li>
-      <% }) %>
-    </ul>
+    <% inputArray.forEach(function(entry, index) { %>
+      <div>
+        <img src="<%- entry.imageURL %>" alt="">
+        <%= entry.songName %> by <%= entry.artists %>
+      </div>
+      <br>
+    <% }) %>
   </div>
   
 

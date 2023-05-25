@@ -110,37 +110,30 @@ app.get('/inputSong', async (req, res) => {
 app.get('/aiData', (req, res) => {
   const songIdArray = req.query.addedSongs ? req.query.addedSongs.split(',') : [];
 
-  console.log("aiData Array Inputs:");
-  songIdArray.forEach((songId, index) => {
-    console.log(`User input ${index + 1} = ${songId}`);
-  });
-  parseUserInput(songIdArray);
+  const parsedInput = parseUserInput(songIdArray);
 
-  res.render('aiData');
-});
+  // const songRecommendations = await sendToAI(parsedInput);
 
-app.get('/spotify', async (req, res) => {
-  try {
-    await getAccessToken();
+  // Replaced by AI recommendation
+  const songRecommendations = ["3F5CgOj3wFlRv51JsHbxhe", "5e9TFTbltYBg2xThimr0rU"];
 
-    res.redirect("playlist");
-  } catch (error) {
-    console.error("Error:", error);
-    res.status(500).json({ error: "An error occurred" });
-  }
+  setTimeout(() => {
+    const recommendationsQuery = encodeURIComponent(songRecommendations.join(',')); // Encode and join the array
+    res.redirect('/playlist?recommendations=' + recommendationsQuery);
+  }, 1500);
 });
 
 app.get("/playlist", async (req, res) => {
   await getAccessToken();
 
-  // Testing array, to be replaced by AI giving array
-  const tempArray = ["3F5CgOj3wFlRv51JsHbxhe", "5e9TFTbltYBg2xThimr0rU"];
-  
+  const recommendations = req.query.recommendations ? req.query.recommendations.split(',') : [];
+
   // Gets array of song details to display on page
-  const tracksDetails = await getTracksFromSongIDs(tempArray);
+  const tracksDetails = await getTracksFromSongIDs(recommendations);
 
   res.render('success', { inputArray: tracksDetails });
 });
+
 
 app.get('/error', (req,res) => {
   res.render("error");

@@ -1,22 +1,16 @@
-.card-container {
-    display: flex;
-    justify-content: start;
-    align-items: center;
-  }
-  
-  ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-  
-  li {
-    display: flex;
-    align-items: center;
-  }
-  
-  li img {
-    height: 5em; /* Adjust the height as needed */
-    margin-right: 0.5em; /* Add spacing between the image and text */
-  }
-  
+
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+li {
+  display: flex;
+  align-items: center;
+}
+
+.card-container img {
+  height: 5em; /* Adjust the height as needed */
+  margin-right: 0.5em; /* Add spacing between the image and text */
+}
