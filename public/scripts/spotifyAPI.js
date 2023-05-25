@@ -102,17 +102,17 @@ async function parseUserInput(songIDArray) {
   const extractedData = [];
 
   const headers = [
-    'Danceability',
-    'Energy',
-    'Key',
-    'Loudness',
-    'Mode',
-    'Speechiness',
-    'Acousticness',
-    'Instrumentalness',
-    'Liveness',
-    'Valence',
-    'Tempo',
+    'danceability',
+    'energy',
+    'key',
+    'loudness',
+    'mode',
+    'speechiness',
+    'acousticness',
+    'instrumentalness',
+    'liveness',
+    'valence',
+    'tempo',
   ];
 
   for (const songID of songIDArray) {
