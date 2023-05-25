@@ -98,17 +98,6 @@ function hasSession(req, res, next) {
 
 app.get('/inputSong', async (req, res) => {
   let addedSongs = req.query.addedSongs || [];
-
-function printRowsWithDelay(rows) {
-  let delay = 0;
-  for (let i = 0; i < rows.length; i++) {
-    setTimeout(async () => {
-      await getAccessToken();
-      const songID = rows[i].song_ID; // Replace "song_ID" with the actual property name
-      console.log(songID);
-      getSongDetails(songID)
-    }, delay);
-    delay += 10000; // 30-second delay
   if (typeof addedSongs === 'string') {
     addedSongs = addedSongs.split(','); // Split the string by commas to create an array
   }
@@ -121,6 +110,8 @@ function printRowsWithDelay(rows) {
 app.get('/aiData', (req, res) => {
   const songIdArray = req.query.addedSongs ? req.query.addedSongs.split(',') : [];
 
+  // This is the loading screen. It will be replaced by the AI's output.
+
   console.log("aiData Array Inputs:");
   songIdArray.forEach((songId, index) => {
     console.log(`User input ${index + 1} = ${songId}`);
@@ -128,7 +119,13 @@ app.get('/aiData', (req, res) => {
   parseUserInput(songIdArray);
 
   res.render('aiData');
+  // res.redirect('generaePlaylist');
 });
+
+app.post('/generatePlaylist'), async (req, res) => {
+  // Do ai stuff here
+  res.redirect('success');
+}
 
 app.get('/spotify', async (req, res) => {
   try {
@@ -142,10 +139,11 @@ app.get('/spotify', async (req, res) => {
 });
 
 app.get("/playlist", async (req, res) => {
+  var file = './inputtest.csv';
   await getAccessToken();
-  const songDetails = await getSongDetails(songCodeLocal);
-  await getTracks();
-  main()
+  await runpyfile(file);
+  // main()
+
 
   // Testing array, to be replaced by AI giving array
   const tempArray = ["3F5CgOj3wFlRv51JsHbxhe", "5e9TFTbltYBg2xThimr0rU"];
