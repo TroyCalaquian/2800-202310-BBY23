@@ -6,13 +6,34 @@
 
 <br>
 <div class="centered">
-    <form action='/securityQuestion' method='post'>
-        <h2>Reset password</h2>
-        <h4>Enter email & answer your security question.</h4>
-        <input name='email' type='email' placeholder='email'>
-        <input name='answer' type='text' placeholder='animal'>
-    <button>Submit</button>
-    </form>
+    <% if (firstEntrance) { %>
+        <form action='/securityQuestion' method='post'>
+            <h2>Reset password</h2>
+            <h4>Enter email</h4>
+            <input name='email' type='email' placeholder='email'>
+            <button>Submit</button>
+        </form>
+    <%} else {%>
+
+        <% if (userState) { %>
+            <form action='/securityQuestion' method='post'>
+                <h2>Reset password</h2>
+                <b><div class="email-error-message"><%=incorrectEmail%></div></b>
+                <h4>Enter email</h4>
+                <input name='email' type='email' placeholder='email'>
+                <button>Submit</button>
+            </form>
+        <%} else {%>     
+
+            <form action='/securityQuestion' method='post'>
+                <h2>Reset password</h2>
+                <h4>Answer your security question.</h4>
+                <label for="answer"><%=securityQuestion%></label>
+                <input name='answer' type='text' placeholder=''>
+            <button>Submit</button>
+            </form>
+        <%}%>
+    <%}%>
 </div>
 
 <%- include('./templates/footer') %>

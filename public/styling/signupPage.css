@@ -1,0 +1,38 @@
+.signup-form{
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    padding-top: 5%;
+}
+.signup-form-info{
+    padding: 10px;
+    justify-content: center;
+    text-align: center;
+    display: grid;
+}
+.signup-form-info-input{
+    width: 100%;
+    margin-bottom: 4px;
+    margin-top: 4px;
+    justify-content: center;
+    align-items: center;
+    justify-self: center;
+    border-radius: 20px;
+    padding-left: 13px;
+}
+.signup-submit-button{
+    border-radius: 20px;
+}
+
+.selectWrapper{
+    border-radius:36px;
+    display:inline-block;
+    overflow:hidden;
+    border:1px solid black;
+  }
+  .selectBox{
+    padding-left: 8px;
+    color: black;
+    border:0px;
+    outline:none;
+  }

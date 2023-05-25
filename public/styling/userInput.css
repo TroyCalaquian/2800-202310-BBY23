@@ -1,0 +1,120 @@
+.card-container {
+    display: flex;
+    justify-content: start;
+    align-items: center;
+  }
+  
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  li {
+    display: flex;
+    align-items: center;
+  }
+  
+  li img {
+    height: 5em; /* Adjust the height as needed */
+    margin-right: 0.5em; /* Add spacing between the image and text */
+  }
+  
+  /* General page styles */
+
+body {
+  background-color: #F2F2F2;
+  font-family: Arial, sans-serif;
+}
+
+.centered {
+  text-align: center;
+  color: #333;
+}
+
+/* Form Styles */
+
+#urlForm {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+#urlForm label {
+  font-size: 1.1em;
+  color: #555;
+  margin-bottom: 5px;
+}
+
+#urlForm input {
+  width: 50%; /* Adjust as needed */
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  font-size: 1em;
+}
+
+#urlForm button {
+  margin-top: 10px;
+  padding: 10px 20px;
+  background-color: #008CBA; /* Change the color as needed */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#urlForm button:hover {
+  background-color: #007B9A; /* Slightly darker version of the original color */
+}
+
+/* Song List Styles */
+
+.card-container {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  padding: 20px;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+}
+
+li {
+  display: flex;
+  align-items: center;
+  background-color: #FFF;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  box-shadow: 0px 0px 5px rgba(0,0,0,0.1);
+}
+
+li img {
+  height: 5em;
+  margin-right: 0.5em;
+}
+
+/* Send songs to AI button styles */
+#aiButton {
+  display: block;
+  padding: 10px 20px;
+  background-color: #4CAF50; /* Original button color - green */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin: 20px auto; /* Centers the button and adds vertical spacing */
+}
+
+#aiButton:hover {
+  background-color: #45A049; /* Slightly darker version of the original green color */
+}
+

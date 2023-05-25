@@ -2,20 +2,24 @@
 
 <!-- Stylesheets added here -->
 
-<%- include('./templates/header') %>
+<link rel="stylesheet" href="../styling/loginPage.css">
 
-&nbsp;<br><h1>Log In</h1>
-<form action='/loggingin' method='post'>
-  <input name='email' type='text' placeholder='email'>
-  <input name='password' type='password' placeholder='password'>
-  <button onclick="location.href='/home'"></buttononclick>Submit</button>
-</form> 
+<%- include('./templates/header') %>
+<div class="login-form">
+  &nbsp;<br><h1 class="login-form-text">Log In</h1>
+  <br>
+  <form action='/loggingin' method='post' class="login-form-info">
+    <input name='email' type='text' placeholder='email' class="login-form-info-input">
+    <input name='password' type='password' placeholder='password' class="login-form-info-input">
+    <button onclick="location.href='/home'"  class="login-form-info-input login-submit-button"></buttononclick>Submit</button>
+  </form> 
+
 <br><br>
 <div class="d-flex justify-content-center">
   <h4>or &nbsp;<br></h4>
-  <button onclick="location.href='/changePassword'">Change Password</button>
+  <button onclick="location.href='/changePassword'" class="changePassword-button">Change Password</button>
 </div>
-
+</div>
 <%- include('./templates/footer') %>
 
 <!-- JS scripts added here -->
