@@ -47,19 +47,3 @@ function sendToAI() {
     console.log("No songs added to the URL");
   }
 }
-
-
-// function sendToAI() {
-//   const urlParams = new URLSearchParams(window.location.search);
-//   const addedSongs = urlParams.getAll('addedSongs');
-  
-//   // Check if there are added songs in the URL
-//   if (addedSongs.length > 0) {
-//     urlParams.set('addedSongs', JSON.stringify(addedSongs));
-//     const url = `/aiData?${urlParams.toString()}`;
-//     window.location.href = url;
-//   } else {
-//     // Handle the case when no songs are added
-//     console.log("No songs added to the URL");
-//   }
-// }
