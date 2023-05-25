@@ -46,6 +46,10 @@ function sendToAI() {
     // Handle the case when no songs are added
     console.log("No songs added to the URL");
   }
+  
+  const url = `/aiData?songIDs=${encodeURIComponent(JSON.stringify(songIDArray))}`;
+  window.location.href = url;
+  return(songIDArray)
 }
 
 
