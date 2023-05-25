@@ -65,7 +65,7 @@
   <h3><%- userName %>'s Playlists</h3>
   <% if (songs.length === 0) {%>
   <p>You have no playlists right now!</p>
-  <button onclick="location.href='/addMusic'">Create Playlist</button>
+  <button onclick="location.href='/inputSong'">Create Playlist</button>
   <% } else { %>
   <ul class="list-group">
     <% songs.forEach(function(song) { %>
