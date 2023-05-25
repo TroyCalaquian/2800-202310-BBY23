@@ -1,29 +1,30 @@
 const { spawn } = require('child_process');
+const { resolve } = require('path');
 
 // Define the Python script file path
 const pythonFilePath = 'AIPython.py';
 
-// Spawn a child process to execute the Python file
-const pythonProcess = spawn('python', [pythonFilePath, inputfile]);
- var inputfile = '' 
-// Listen for output from the Python process
-function runpyfile(inputfile) {
-  const pythonProcess = spawn('python', [pythonFilePath, inputfile]);
-  pythonProcess.stdout.on('data', (data) => {
-    console.log(`Received data from Python: ${data}`);
-    return data
-  });
 
+async function runpyfile(inputfile) {
+  return new Promise((resolve, reject) => {
+    var song_ID;
+    const pythonProcess = spawn('python', [pythonFilePath, inputfile]);
 
-  // Listen for errors from the Python process
-  pythonProcess.stderr.on('data', (data) => {
-    console.error(`Error from Python: ${data}`);
-  });
+    pythonProcess.stdout.on('data', (data) => {
+      song_ID = `${data}`;
+    });
 
-  // Handle the exit event of the Python process
-  pythonProcess.on('close', (code) => {
-    console.log(`Python process exited with code ${code}`);
+    pythonProcess.stderr.on('data', (data) => {
+      console.error(`Error from Python: ${data}`);
+      reject(data);
+    });
+
+    pythonProcess.on('close', (code) => {
+      console.log(`Python process exited with code ${code}`);
+      resolve(song_ID);
+    });
   });
 }
 
-module.exports = {runpyfile}
+
+module.exports = { runpyfile }

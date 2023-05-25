@@ -134,7 +134,10 @@ app.get('/spotify', async (req, res) => {
 });
 
 app.get('/success', async (req, res) => {
+  var file = './inputtest.csv'
   await getAccessToken();
+  const songID = await runpyfile(file);
+  console.log("song_ID: " + songID);
   const tracksDetails = await getTracksFromPlayList(playListCodeLocal);
   const songDetails = await getSongDetails(songCodeLocal);
   await getTracks();
