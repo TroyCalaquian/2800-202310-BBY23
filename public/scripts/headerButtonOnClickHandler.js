@@ -17,7 +17,10 @@ switch (afterSlash){
   break; 
   case "results": afterSlash = "add";
   break; 
-
+  case "welcome": afterSlash = "home";
+  break; 
+  case "inputSong": afterSlash = "add";
+  break; 
   default: break;
 }
 if (afterSlash == "profile" || afterSlash == "home" || afterSlash == "addMusic" || afterSlash == "login" || afterSlash == "signup" 

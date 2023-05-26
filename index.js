@@ -152,7 +152,7 @@ app.get("/", (req, res) => {
   var sessionState = req.session.authenticated;
   var username = req.session.name;
 
-  res.render("welcome", { isLoggedIn: sessionState, userName: username });
+  res.render("index", { isLoggedIn: sessionState, userName: username });
 });
 
 app.get("/callback", async (req, res) => {
@@ -319,7 +319,7 @@ app.post("/submitUser", upload.single("profilePicture"), async (req, res) => {
       pfp: base64DataUrl,
       playlists: [],
     });
-    res.redirect("/welcome");
+    res.redirect("/home");
   } catch (error) {
     console.error("Failed to update photo:", error);
     res.status(500).send("Failed to update photo.");
@@ -328,7 +328,7 @@ app.post("/submitUser", upload.single("profilePicture"), async (req, res) => {
 });
 
 app.get("/welcome", hasSession, (req, res) => {
-  res.render("welcome", {
+  res.render("index", {
     isLoggedIn: req.session.authenticated,
     userName: req.session.name,
   });
@@ -364,7 +364,7 @@ app.post("/changingPassword", async (req, res) => {
   if (req.session.authenticated) {
     console.log(currentUser.username + "going to welcome");
 
-    res.render("welcome", {
+    res.render("profile", {
       userName: currentUser.username,
       isLoggedIn: req.session.authenticated,
     });
@@ -418,7 +418,9 @@ app.get("/logout", (req, res) => {
 });
 
 app.get("/home", hasSession, (req, res) => {
-  res.render("index");
+  var sessionState = req.session.authenticated;
+  var username = req.session.name;
+  res.render("index" , { isLoggedIn: sessionState, userName: username });
 });
 
 app.get("/profile", hasSession, async (req, res) => {
