@@ -31,7 +31,7 @@ const openai = new OpenAIApi(configuration);
 
 /* Linked JS file's functions */
 const {runpyfile} = require('./AI.js')
-const { getAccessToken, getTracksFromSongIDs, getTracksFromPlayList, getPlaylistName, parseUserInput, getTracks } = require('./public/scripts/spotifyAPI.js');
+const { getAccessToken, getTracksFromSongIDs, getTracksFromPlayList, getPlaylistName, parseUserInput, getTracks, getRandomSongIDs } = require('./public/scripts/spotifyAPI.js');
 require("./utils.js");
 
 /* Node Server Setups */
@@ -112,7 +112,7 @@ app.get('/inputSong', async (req, res) => {
 app.get('/aiData', (req, res) => {
   const songIdArray = req.query.addedSongs ? req.query.addedSongs.split(',') : [];
 
-  const parsedInput = parseUserInput(songIdArray);
+  parseUserInput(songIdArray);
 
   // const songRecommendations = await sendToAI(parsedInput);
 
@@ -125,15 +125,8 @@ app.get('/aiData', (req, res) => {
   }, 1500);
 });
 
-app.get('/success', async (req, res) => {
-  var file = './inputtest.csv'
+app.get("/playlist", async (req, res) => {
   await getAccessToken();
-  const songID = await runpyfile(file);
-  console.log("song_ID: " + songID);
-  // const tracksDetails = await getTracksFromPlayList(playListCodeLocal);
-  // const songDetails = await getSongDetails(songCodeLocal);
-  await getTracks();
-  // main()
 
   const recommendations = req.query.recommendations ? req.query.recommendations.split(',') : [];
 
@@ -417,8 +410,17 @@ app.get("/logout", (req, res) => {
   return res.redirect("/");
 });
 
-app.get("/home", hasSession, (req, res) => {
-  res.render("index");
+app.get("/home", hasSession, async (req, res) => {
+  try {
+    const randomSongIDs = await getRandomSongIDs(); // Get 3 random song IDs
+
+    const tracksDetails = await getTracksFromSongIDs(randomSongIDs);
+
+    res.render('index', { inputArray: tracksDetails });
+} catch (error) {
+  console.error('Error:', error);
+  res.render('error'); // Render the 'error' template in case of an error
+}
 });
 
 app.get("/profile", hasSession, async (req, res) => {
