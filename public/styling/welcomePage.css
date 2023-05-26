@@ -1,4 +1,4 @@
-#signup-button, #login-button, #enter-button, #logout-button, #change-password-button {
+#signup-button, #login-button, #enter-button, #logout-button, #change-password-button, #find-music-button {
     padding: 10px 20px;
     margin: 10px;
     border-radius: 5px;
@@ -10,7 +10,7 @@
     transition: background-color 0.3s ease;
 }
 
-#signup-button:hover, #login-button:hover, #enter-button:hover, #logout-button:hover, #change-password-button:hover {
+#signup-button:hover, #login-button:hover, #enter-button:hover, #logout-button:hover, #change-password-button:hover, #find-music-button:hover {
     background-color: #0056b3;
 }
 

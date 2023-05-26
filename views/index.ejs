@@ -1,5 +1,6 @@
 <%- include('./templates/htmlOpen') %>
 <!-- Stylesheets added here -->
+<link rel="stylesheet" href="/styling/welcomePage.css">
 <%- include('./templates/header') %>
 
 <!-- Welcome -->
@@ -26,12 +27,7 @@
 
 <!-- Find Music Search -->
 <div class="d-flex justify-content-center">
-    <div class="input-group input-group-lg">
-        <div class="input-group-prepend">
-            <span class="input-group-text" id="inputGroup-sizing-lg"><img src="https://dummyimage.com/30X30/0011ff/" alt="Search Icon Standin"></span>
-        </div>
-        <input type="text" class="form-control" placeholder="Enter Music" aria-label="Large" aria-describedby="inputGroup-sizing-sm">
-    </div>
+    <button id="find-music-button" onclick="location.href='/inputSong'">Find Music</button>
 </div><br>
 
 <%- include('./templates/footer') %>
