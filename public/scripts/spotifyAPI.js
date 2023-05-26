@@ -2,6 +2,7 @@
 const SpotifyWebApi = require('spotify-web-api-node');
 require('dotenv').config();
 const fs = require('fs');
+const util = require('util');
 const csv = require('csv-parser');
 
 // .env secrets
@@ -231,6 +232,34 @@ function printRowsWithDelay(rows) {
 const csvFilePath = 'C:\\Users\\MaxwellV\\Desktop\\song_id.csv';
 // readCSV(csvFilePath);
 
+
+const readFile = util.promisify(fs.readFile);
+
+async function getRandomSongIDs() {
+  try {
+    const songIDs = await readFile('./song_id.csv', 'utf8');
+    const parsedData = songIDs
+      .trim() // Remove leading/trailing whitespace
+      .split('\n'); // Split the string into an array of lines
+
+    const randomSongIDs = [];
+    const totalSongs = parsedData.length;
+
+    for (let i = 0; i < 3; i++) {
+      const randomIndex = Math.floor(Math.random() * totalSongs);
+      const randomSongID = parsedData[randomIndex];
+      randomSongIDs.push(randomSongID);
+    }
+
+    // console.log(randomSongIDs);
+    return randomSongIDs;
+  } catch (error) {
+    console.error('Error reading song ID file:', error);
+    return [];
+  }
+}
+
+
 async function getTracks() {
   // let limit = 50
   // let  offset = 10
@@ -262,5 +291,5 @@ async function getTracks() {
 }
 
 // Share these function in this file.
-module.exports = { getAccessToken, getTracksFromSongIDs, getTracksFromPlayList, getPlaylistName, parseUserInput, getTracks };
+module.exports = { getAccessToken, getTracksFromSongIDs, getTracksFromPlayList, getPlaylistName, parseUserInput, getTracks, getRandomSongIDs };
 

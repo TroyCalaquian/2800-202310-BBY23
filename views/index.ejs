@@ -12,17 +12,22 @@
     <h3>Songs For You:<br></h3>
 </div>
 
-<!-- Music Display -->
+<!-- Find Music Button -->
 <div class="d-flex justify-content-center">
-    <img src="https://dummyimage.com/150X150/57B8FF" alt="Icon1" class="img-thumbnail">
-    <img src="https://dummyimage.com/150X150/FBB13C" alt="Icon2" class="img-thumbnail">
-    <img src="https://dummyimage.com/150X150/FE6847" alt="Icon3" class="img-thumbnail">
-</div><br><br>
+    <a href="/inputSong">
+      <button class="btn btn-primary btn-lg" style="background-color: blue;">Find New Music</button>
+    </a>
+  </div>
+  
 
-<!-- Find Music Title -->
-<div class="d-flex justify-content-center">
-    <h3>Find New Music<br></h3>
+<!-- Music Display -->
+<div class="card-container d-flex justify-content-start centered">
+    <% inputArray.forEach(function(entry) { %>
+    <%- include('./templates/songCard', { entry: entry }) %>
+    <% }) %>
 </div>
+
+
 
 <!-- Find Music Search -->
 <div class="d-flex justify-content-center">

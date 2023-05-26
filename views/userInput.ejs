@@ -6,14 +6,15 @@
 <%- include('./templates/header') %>
 
 <h1 class="centered">User input</h1>
-<br><h3>Songs:</h3><br>
-<button class="delete-all-button">Delete All Entries</button>
+
 
   <form id="urlForm">
-    <label for="url">Enter Spotify Song URL:</label>
+    <label for="url">Paste the <b>entire</b> URL of a Spotify song here</label>
     <input type="text" id="url" name="url" required>
     <button type="submit">Add Song</button>
+    <button class="delete-all-button" id="danger">Delete All Entries</button>
   </form>
+  <br><h3>Songs:</h3><br>
 
   <div class="card-container">
     <% inputArray.forEach(function(entry, index) { %>

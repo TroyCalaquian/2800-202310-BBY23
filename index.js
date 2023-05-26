@@ -30,7 +30,8 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration);
 
 /* Linked JS file's functions */
-const { getAccessToken, getTracksFromSongIDs, getTracksFromPlayList, getPlaylistName, parseUserInput, getTracks } = require('./public/scripts/spotifyAPI.js');
+const {runpyfile} = require('./AI.js')
+const { getAccessToken, getTracksFromSongIDs, getTracksFromPlayList, getPlaylistName, parseUserInput, getTracks, getRandomSongIDs } = require('./public/scripts/spotifyAPI.js');
 require("./utils.js");
 const {runpyfile} = require('./AI.js')
 
@@ -420,8 +421,17 @@ app.get("/logout", (req, res) => {
   return res.redirect("/");
 });
 
-app.get("/home", hasSession, (req, res) => {
-  res.render("index");
+app.get("/home", hasSession, async (req, res) => {
+  try {
+    const randomSongIDs = await getRandomSongIDs(); // Get 3 random song IDs
+
+    const tracksDetails = await getTracksFromSongIDs(randomSongIDs);
+
+    res.render('index', { inputArray: tracksDetails });
+} catch (error) {
+  console.error('Error:', error);
+  res.render('error'); // Render the 'error' template in case of an error
+}
 });
 
 app.get("/profile", hasSession, async (req, res) => {
