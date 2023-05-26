@@ -109,12 +109,11 @@ async function parseUserInput(songIDArray) {
     'tempo',
   ];
 
+  extractedData.push(headers.join(',')); // Add header row
+
   for (const songID of songIDArray) {
     const response = await spotifyAPI.getAudioFeaturesForTrack(songID);
     const audioFeatures = response.body;
-
-    const csvData = [];
-    csvData.push(headers.join(',')); // Add header row
 
     const songData = [
       audioFeatures.danceability.toString(),
@@ -130,20 +129,29 @@ async function parseUserInput(songIDArray) {
       audioFeatures.tempo.toString(),
     ];
 
-    csvData.push(songData.join(',')); // Add song data row
-
-    extractedData.push(csvData.join('\n')); // Push CSV data as a string
+    extractedData.push(songData.join(',')); // Add song data row
   }
 
-  printCSVData(extractedData.join('\n\n'));
+  saveToFile(extractedData.join('\n'));
+
   return extractedData;
 }
 
-// Prints data 
-function printCSVData(csvData) {
-  console.log("\nprintCSVData Prints:");
-  console.log(csvData);
+// Save data to a file
+function saveToFile(data) {
+  fs.writeFile('./inputtest.csv', data, { flag: 'w' }, function(err) {
+    if (err) {
+      console.error('Error saving data to file:', err);
+    } else {
+      console.log('Data saved to file successfully.');
+    }
+  });
 }
+
+
+
+
+
 
 // Parses and sets detailed info of given song to CSV file.
 async function printSongDetailsToCSV(songCode) {

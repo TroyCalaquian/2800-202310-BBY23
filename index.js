@@ -30,9 +30,9 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration);
 
 /* Linked JS file's functions */
-const {runpyfile} = require('./AI.js')
 const { getAccessToken, getTracksFromSongIDs, getTracksFromPlayList, getPlaylistName, parseUserInput, getTracks } = require('./public/scripts/spotifyAPI.js');
 require("./utils.js");
+const {runpyfile} = require('./AI.js')
 
 /* Node Server Setups */
 app.set("view engine", "ejs");
@@ -109,31 +109,34 @@ app.get('/inputSong', async (req, res) => {
   res.render('userInput', { inputArray: parsedSongs });
 });
 
-app.get('/aiData', (req, res) => {
+app.get('/aiData', async (req, res) => {
   const songIdArray = req.query.addedSongs ? req.query.addedSongs.split(',') : [];
 
-  const parsedInput = parseUserInput(songIdArray);
-
-  // const songRecommendations = await sendToAI(parsedInput);
+  parseUserInput(songIdArray);
+  // await sendToAI()
 
   // Replaced by AI recommendation
-  const songRecommendations = ["3F5CgOj3wFlRv51JsHbxhe", "5e9TFTbltYBg2xThimr0rU"];
-
-  setTimeout(() => {
-    const recommendationsQuery = encodeURIComponent(songRecommendations.join(',')); // Encode and join the array
+  // const songRecommendations =   ['03tqyYWC9Um2ZqU0ZN849H', '03tqyYWC9Um2ZqU0ZN849H']
+  const songRecommendationsString = await sendToAI()
+  const songRecommendations = JSON.parse(songRecommendationsString);
+  // console.log(typeof songRecommendations)
+  // setTimeout(() => {
+    const recommendationsQuery = songRecommendations.map(item => encodeURIComponent(item)).join(',');
+ // Encode and join the array
     res.redirect('/playlist?recommendations=' + recommendationsQuery);
-  }, 1500);
+  // }, 1500);
 });
 
-app.get('/success', async (req, res) => {
-  var file = './inputtest.csv'
+async function sendToAI() {
+  file = './inputtest.csv';
+  var songID = await runpyfile(file);
+  // const array = songID.split(','); // Split the string using comma as delimiter
+  console.log(songID);
+  return songID;
+}
+
+app.get("/playlist", async (req, res) => {
   await getAccessToken();
-  const songID = await runpyfile(file);
-  console.log("song_ID: " + songID);
-  // const tracksDetails = await getTracksFromPlayList(playListCodeLocal);
-  // const songDetails = await getSongDetails(songCodeLocal);
-  await getTracks();
-  // main()
 
   const recommendations = req.query.recommendations ? req.query.recommendations.split(',') : [];
 

@@ -7,11 +7,13 @@ const pythonFilePath = 'AIPython.py';
 
 async function runpyfile(inputfile) {
   return new Promise((resolve, reject) => {
-    var song_ID;
+    // let songarray = [];
+    let songRecommendationsString = '';
     const pythonProcess = spawn('python', [pythonFilePath, inputfile]);
 
     pythonProcess.stdout.on('data', (data) => {
-      song_ID = `${data}`;
+      songarray = `${data}`.trim().split('\n');
+      songRecommendationsString = `${data}`.trim();
     });
 
     pythonProcess.stderr.on('data', (data) => {
@@ -21,7 +23,8 @@ async function runpyfile(inputfile) {
 
     pythonProcess.on('close', (code) => {
       console.log(`Python process exited with code ${code}`);
-      resolve(song_ID);
+      // resolve(songarray);
+      resolve(songRecommendationsString);
     });
   });
 }
