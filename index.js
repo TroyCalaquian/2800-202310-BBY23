@@ -97,7 +97,7 @@ function hasSession(req, res, next) {
   }
 }
 
-app.get('/inputSong', async (req, res) => {
+app.get('/inputSong', hasSession, async (req, res) => {
   let addedSongs = req.query.addedSongs || [];
 
 
