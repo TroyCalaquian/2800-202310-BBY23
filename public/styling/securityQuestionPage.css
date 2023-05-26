@@ -1,0 +1,13 @@
+.security-question-page{
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    
+}
+.reset-pass-info{
+    border-radius: 20px;
+    padding-left: 13px;
+}
+.reset-pass-button{
+    border-radius: 20px;   
+}
