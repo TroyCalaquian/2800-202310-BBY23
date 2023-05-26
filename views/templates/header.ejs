@@ -7,13 +7,18 @@
     </button>
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
       <div class="navbar-nav">
-        <button class="nav-item nav-link active" id="profileButton">Profile</a>
+        <% if (userLoginStatus) { %>
+          <button class="nav-item nav-link active" id="profileButton"><img id="pfp" src="<%- user.pfp %>" style="width: 30px; height: 30px"></a>
+        <% } else {%>
+          <button class="nav-item nav-link active" id="profileButton">Profile</a>
+        <% } %>
         <button class="nav-item nav-link active" id="homeButton">Home</a>
-        <button class="nav-item nav-link active" id="addButton">Create Playlist</a>
+        <button class="nav-item nav-link active" id="addButton">Find New Music</a>
       <% if (userLoginStatus) { %>
-        <button class="nav-item nav-link active" id="logoutButton">Logout</a>
+        <button class="nav-item nav-link active header-button" id="logoutButton">Logout</a>
       <%} else {%>
-        <button class="nav-item nav-link active" id="loginButton">Login</a>
+        <button class="nav-item nav-link active header-button" id="loginButton">Login</a>
+        <button class="nav-item nav-link active header-button" id="signupButton">Sign Up</a>
       <%}%>
       </div>
     </div>

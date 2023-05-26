@@ -1,0 +1,38 @@
+<%- include('./templates/htmlOpen') %>
+
+<!-- Stylesheets added here -->
+<link rel="stylesheet" href="../styling/userInput.css">
+
+<%- include('./templates/header') %>
+
+<h1 class="centered">User input</h1>
+
+
+  <form id="urlForm">
+    <label for="url">Paste the <b>entire</b> URL of a Spotify song here</label>
+    <input type="text" id="url" name="url" required>
+    <button type="submit">Add Song</button>
+    <button class="delete-all-button" id="danger">Delete All Entries</button>
+  </form>
+  <br><h3>Songs:</h3><br>
+
+  <div class="card-container">
+    <% inputArray.forEach(function(entry, index) { %>
+      <div>
+        <img src="<%- entry.imageURL %>" alt="">
+        <%= entry.songName %> by <%= entry.artists %>
+      </div>
+      <br>
+    <% }) %>
+  </div>
+  
+
+  <button id="aiButton" onclick="sendToAI()">Send songs to AI</button>
+
+
+<!-- < %- include('./templates/footer') %> -->
+
+<!-- JS scripts added here -->
+<script src="../scripts/userInput.js"></script>
+
+<%- include('./templates/htmlClose') %>

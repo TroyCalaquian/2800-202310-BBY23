@@ -1,7 +1,7 @@
 <%- include('./templates/htmlOpen') %>
 
 <!-- Stylesheets added here -->
-
+<link rel="stylesheet" href="../styling/securityQuestionPage.css">
 <%- include('./templates/header') %>
 
 <br>
@@ -10,27 +10,25 @@
         <form action='/securityQuestion' method='post'>
             <h2>Reset password</h2>
             <h4>Enter email</h4>
-            <input name='email' type='email' placeholder='email'>
-            <button>Submit</button>
+            <input name='email' type='email' placeholder='email' class="reset-pass-info">
+            <button class="reset-pass-button">Submit</button>
         </form>
     <%} else {%>
-
         <% if (userState) { %>
             <form action='/securityQuestion' method='post'>
                 <h2>Reset password</h2>
                 <b><div class="email-error-message"><%=incorrectEmail%></div></b>
                 <h4>Enter email</h4>
-                <input name='email' type='email' placeholder='email'>
-                <button>Submit</button>
+                <input name='email' type='email' placeholder='email' class="reset-pass-info">
+                <button class="reset-pass-button">Submit</button>
             </form>
-        <%} else {%>     
-
+        <%} else {%>  
             <form action='/securityQuestion' method='post'>
                 <h2>Reset password</h2>
                 <h4>Answer your security question.</h4>
                 <label for="answer"><%=securityQuestion%></label>
-                <input name='answer' type='text' placeholder=''>
-            <button>Submit</button>
+                <input name='answer' type='text' placeholder='' class="reset-pass-info">
+            <button class="reset-pass-button">Submit</button>
             </form>
         <%}%>
     <%}%>

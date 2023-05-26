@@ -1,60 +1,96 @@
 <%- include('./templates/htmlOpen') %>
 <!-- Stylesheets added here -->
-        <link rel="stylesheet" href="../styling/profilePageStylesheet.css">
+<link rel="stylesheet" href="../styling/profilePageStylesheet.css" />
+<style>
+  /* Adjust the profile pic and username layout for smaller screens */
+  @media (max-width: 576px) {
+    .profileDisplay {
+      flex-direction: column;
+      align-items: center;
+    }
+    #username {
+      margin-top: 10px;
+    }
+  }
+</style>
 
 <%- include('./templates/header') %>
 
 <!-- These values to be converted to read from database. -->
-<% const username = "currentUser" %>
-<% const profileLink = "https://dummyimage.com/200x200/000/fff" %>
-<% const songs = ['song1', 'song2', 'song3']; %>
+<% const username = "currentUser" %> <% const profileLink =
+"https://dummyimage.com/200x200/000/fff" %> <% const songs = user.playlists; %>
 
 <!-- Assembly of pic & username -->
 <!-- Assembly of pic & username -->
 <div class="profileDisplay d-flex justify-content-center">
-    <img id="profilePic" src="<%- user.pfp %>" alt="Profile Picture">
-    <h1 id="username"><%- userName %></h1>
+  <img id="profilePic" src="<%- user.pfp %>" alt="Profile Picture" />
+  <h1 id="username"><%- userName %></h1>
 </div>
 
-
-  <!-- Edit Username Form -->
-  <form id="usernameForm" action="/editUsername" method="POST" style="display:none;">
-    <label for="username">New Username:</label>
-    <input type="text" id="username" name="username">
-    <input type="submit" value="Change Username">
+<!-- Edit Username Form -->
+<form
+  id="usernameForm"
+  action="/editUsername"
+  method="POST"
+  style="display: none"
+>
+  <label for="username">New Username:</label>
+  <input type="text" id="username" name="username" />
+  <input type="submit" value="Change Username" />
 </form>
-    
+
 <!-- Edit PFP From -->
-<form id="profilePictureForm" action="/editPhoto" method="POST" enctype="multipart/form-data" style="display:none;">
-    <input type="file" name="profilePicture" id="profilePictureInput" accept="image/*">
-    <button type="submit">Upload</button>
-  </form>
-  
-  <button id="editUsernameButton">Edit Username</button>
-  <button id="editPfpButton">Update Profile Picture</button>
+<form
+  id="profilePictureForm"
+  action="/editPhoto"
+  method="POST"
+  enctype="multipart/form-data"
+  style="display: none"
+>
+  <input
+    type="file"
+    name="profilePicture"
+    id="profilePictureInput"
+    accept="image/*"
+  />
+  <button type="submit">Upload</button>
+</form>
+
+<button id="editUsernameButton">Edit Username</button>
+<button id="editPfpButton">Update Profile Picture</button>
+<button id="change-password-button" onclick="location.href='/changePassword'">Change Password</button>
 
 <!-- This user's playlists -->
-<br><div id="userPlaylists">
-    <h3><%- userName %>'s Playlists</h3>
-    <ul class="list-group">
-        <% songs.forEach(function(song) { %>
-            <li class="list-group-item"><%= song %></li>
-        <% }); %>
-    </ul>
+<br />
+<div id="userPlaylists">
+  <h3><%- userName %>'s Playlists</h3>
+  <% if (songs.length === 0) {%>
+  <p>You have no playlists right now!</p>
+  <button onclick="location.href='/inputSong'">Create Playlist</button>
+  <% } else { %>
+  <ul class="list-group">
+    <% songs.forEach(function(song) { %>
+    <li class="list-group-item"><%= song %></li>
+    <% }); %>
+  </ul>
+  <% } %>
 </div>
 
 <%- include('./templates/footer') %>
 
 <!-- js scripts added here -->
 <script>
-    document.getElementById('editUsernameButton').addEventListener('click', function() {
-        document.getElementById('usernameForm').style.display = 'block';
+  document
+    .getElementById("editUsernameButton")
+    .addEventListener("click", function () {
+      document.getElementById("usernameForm").style.display = "block";
     });
 
-    document.getElementById('editPfpButton').addEventListener('click', function() {
-        document.getElementById('profilePictureForm').style.display = 'block';
+  document
+    .getElementById("editPfpButton")
+    .addEventListener("click", function () {
+      document.getElementById("profilePictureForm").style.display = "block";
     });
-
 </script>
 
-<%- include('./templates/htmlClose') %> 
+<%- include('./templates/htmlClose') %>

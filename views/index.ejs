@@ -1,10 +1,25 @@
 <%- include('./templates/htmlOpen') %>
 <!-- Stylesheets added here -->
+<link rel="stylesheet" href="/styling/welcomePage.css">
 <%- include('./templates/header') %>
 
 <!-- Welcome -->
+
+<% if (!isLoggedIn) { %>
+  <div class="text-center">
+    <h1 class="site-welcome-head">Welcome to SoundScope!</h2>
+    
+    <p>Soundscope uses AI technology to help you discover new music tailored to your taste. Tired of looping the same songs? We've got you covered!</p>
+    <p>To start exploring, sign up or log in, give us some of your favorite songs, and let SoundScope create a unique playlist just for you. Dive into the world of music like never before.</p>
+    <br><br><br>
+    <h2>Ready to start your musical journey?</h2>
+    <button id="signup-button" onclick="location.href='/signup'">Sign Up</button>
+    <button id="login-button" onclick="location.href='/login'">Login</button>
+  </div>
+<% } else { %>
+
 <br><div class="d-flex justify-content-center">
-    <h1>Welcome!</h1>
+    <h1>Welcome back, <%= userName %>!</h1>
 </div><br>
 
 <!-- New Music Title -->
@@ -12,28 +27,24 @@
     <h3>Songs For You:<br></h3>
 </div>
 
-<!-- Music Display -->
+<!-- Find Music Button -->
 <div class="d-flex justify-content-center">
-    <img src="https://dummyimage.com/150X150/57B8FF" alt="Icon1" class="img-thumbnail">
-    <img src="https://dummyimage.com/150X150/FBB13C" alt="Icon2" class="img-thumbnail">
-    <img src="https://dummyimage.com/150X150/FE6847" alt="Icon3" class="img-thumbnail">
-</div><br><br>
+    <a href="/inputSong">
+      <button class="btn btn-primary btn-lg" style="background-color: blue;">Find New Music</button>
+    </a>
+  </div>
 
-<!-- Find Music Title -->
-<div class="d-flex justify-content-center">
-    <h3>Find New Music<br></h3>
+  <br>
+  
+
+<!-- Music Display -->
+<div class="card-container d-flex justify-content-start centered">
+    <% inputArray.forEach(function(entry) { %>
+    <%- include('./templates/songCard', { entry: entry }) %>
+    <% }) %>
 </div>
 
-<!-- Find Music Search -->
-<div class="d-flex justify-content-center">
-    <div class="input-group input-group-lg">
-        <div class="input-group-prepend">
-            <span class="input-group-text" id="inputGroup-sizing-lg"><img src="https://dummyimage.com/30X30/0011ff/" alt="Search Icon Standin"></span>
-        </div>
-        <input type="text" class="form-control" placeholder="Enter Music" aria-label="Large" aria-describedby="inputGroup-sizing-sm">
-    </div>
-</div><br>
-
+<% } %>
 <%- include('./templates/footer') %>
 
 <!-- js scripts added here -->

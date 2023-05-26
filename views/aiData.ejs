@@ -1,0 +1,32 @@
+<%- include('./templates/htmlOpen') %>
+
+<!-- Stylesheets added here -->
+
+<%- include('./templates/header') %>
+
+<br>
+<h1 class="centered">AI processing will be done in this page's place</h1>
+<h2 class="centered">Place a loading screen here, then a redirect when<br>AI returns its value</h2>
+<h3 class="centered">Change this page to loading</h3>
+
+<br><br>
+
+<button id="redirectButton" class="centered" style="display: flex; justify-content: center; align-items: center;">Open Playlist</button>
+
+
+<!-- This should be in a seperate JS file, but will be deleted when AI is implemented -->
+<script>
+  const redirectButton = document.getElementById("redirectButton");
+
+  // Add a click event listener to the button
+  redirectButton.addEventListener("click", () => {
+    // Change the URL to "/playlist"
+    window.location.href = "/playlist";
+  });
+</script>
+
+<%- include('./templates/footer') %>
+
+<!-- JS scripts added here -->
+
+<%- include('./templates/htmlClose') %>
