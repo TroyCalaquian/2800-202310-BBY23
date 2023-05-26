@@ -1,10 +1,25 @@
 <%- include('./templates/htmlOpen') %>
 <!-- Stylesheets added here -->
+<link rel="stylesheet" href="/styling/welcomePage.css">
 <%- include('./templates/header') %>
 
 <!-- Welcome -->
+
+<% if (!isLoggedIn) { %>
+  <div class="text-center">
+    <h1 class="site-welcome-head">Welcome to SoundScope!</h2>
+    
+    <p>Soundscope uses AI technology to help you discover new music tailored to your taste. Tired of looping the same songs? We've got you covered!</p>
+    <p>To start exploring, sign up or log in, give us some of your favorite songs, and let SoundScope create a unique playlist just for you. Dive into the world of music like never before.</p>
+    <br><br><br>
+    <h2>Ready to start your musical journey?</h2>
+    <button id="signup-button" onclick="location.href='/signup'">Sign Up</button>
+    <button id="login-button" onclick="location.href='/login'">Login</button>
+  </div>
+<% } else { %>
+
 <br><div class="d-flex justify-content-center">
-    <h1>Welcome!</h1>
+    <h1>Welcome back, <%= userName %>!</h1>
 </div><br>
 
 <!-- New Music Title -->
@@ -38,7 +53,7 @@
         <input type="text" class="form-control" placeholder="Enter Music" aria-label="Large" aria-describedby="inputGroup-sizing-sm">
     </div>
 </div><br>
-
+<% } %>
 <%- include('./templates/footer') %>
 
 <!-- js scripts added here -->

@@ -156,7 +156,7 @@ app.get("/", (req, res) => {
   var sessionState = req.session.authenticated;
   var username = req.session.name;
 
-  res.render("welcome", { isLoggedIn: sessionState, userName: username });
+  res.render("index", { isLoggedIn: sessionState, userName: username });
 });
 
 app.get("/callback", async (req, res) => {
@@ -323,7 +323,7 @@ app.post("/submitUser", upload.single("profilePicture"), async (req, res) => {
       pfp: base64DataUrl,
       playlists: [],
     });
-    res.redirect("/welcome");
+    res.redirect("/home");
   } catch (error) {
     console.error("Failed to update photo:", error);
     res.status(500).send("Failed to update photo.");
@@ -332,7 +332,7 @@ app.post("/submitUser", upload.single("profilePicture"), async (req, res) => {
 });
 
 app.get("/welcome", hasSession, (req, res) => {
-  res.render("welcome", {
+  res.render("index", {
     isLoggedIn: req.session.authenticated,
     userName: req.session.name,
   });
@@ -368,7 +368,7 @@ app.post("/changingPassword", async (req, res) => {
   if (req.session.authenticated) {
     console.log(currentUser.username + "going to welcome");
 
-    res.render("welcome", {
+    res.render("profile", {
       userName: currentUser.username,
       isLoggedIn: req.session.authenticated,
     });
@@ -421,13 +421,16 @@ app.get("/logout", (req, res) => {
   return res.redirect("/");
 });
 
+
 app.get("/home", hasSession, async (req, res) => {
   try {
+    var sessionState = req.session.authenticated;
+  var username = req.session.name;
     const randomSongIDs = await getRandomSongIDs(); // Get 3 random song IDs
 
     const tracksDetails = await getTracksFromSongIDs(randomSongIDs);
 
-    res.render('index', { inputArray: tracksDetails });
+    res.render('index', { inputArray: tracksDetails, isLoggedIn: sessionState, userName: username });
 } catch (error) {
   console.error('Error:', error);
   res.render('error'); // Render the 'error' template in case of an error
