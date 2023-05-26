@@ -136,17 +136,26 @@ The ai was used throughout the project, helping us create, debug, and improve co
 
 # Contact information
 Troy Calaquian:
-Phone: 778-870-7980
-Email: trcalaquian@gmail.com
-Discord: LaggySoul#6506
+- Phone: 778-870-7980
+- Email: trcalaquian@gmail.com
+- Discord: LaggySoul#6506
 
 Brandon Rada:
-Phone: 778-302-3689
-Email: brandonn.rada@gmail.com
-Discord: gorgenschnauf27#0233
+- Phone: 778-302-3689
+- Email: brandonn.rada@gmail.com
+- Discord: gorgenschnauf27#0233
 
 Caleb Chiang:
+- Phone: 778-823-1022 
+- Email: calebchiang1002@gmail.com
+- Discord: calebchiang#3996
 
 Maxwell Vanderhoeven:
+- Phone: 778-788-1617
+- Email: maxvanderhoeven222@gmail.com
+- Discord: PorkChap22#2948
 
 Kapish Singla:
+- Phone: 778-680-2153
+- Email: kapishsingla.2004@gmail.com
+- Discord: LIMBO#3049
