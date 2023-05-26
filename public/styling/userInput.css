@@ -55,6 +55,10 @@ body {
   font-size: 1em;
 }
 
+#urlForm #danger {
+  background-color: red; /* Change the color as needed */
+}
+
 #urlForm button {
   margin-top: 10px;
   padding: 10px 20px;

@@ -2,6 +2,7 @@
 const SpotifyWebApi = require('spotify-web-api-node');
 require('dotenv').config();
 const fs = require('fs');
+const util = require('util');
 const csv = require('csv-parser');
 
 // .env secrets
@@ -109,12 +110,11 @@ async function parseUserInput(songIDArray) {
     'tempo',
   ];
 
+  extractedData.push(headers.join(',')); // Add header row
+
   for (const songID of songIDArray) {
     const response = await spotifyAPI.getAudioFeaturesForTrack(songID);
     const audioFeatures = response.body;
-
-    const csvData = [];
-    csvData.push(headers.join(',')); // Add header row
 
     const songData = [
       audioFeatures.danceability.toString(),
@@ -130,20 +130,29 @@ async function parseUserInput(songIDArray) {
       audioFeatures.tempo.toString(),
     ];
 
-    csvData.push(songData.join(',')); // Add song data row
-
-    extractedData.push(csvData.join('\n')); // Push CSV data as a string
+    extractedData.push(songData.join(',')); // Add song data row
   }
 
-  printCSVData(extractedData.join('\n\n'));
+  saveToFile(extractedData.join('\n'));
+
   return extractedData;
 }
 
-// Prints data 
-function printCSVData(csvData) {
-  console.log("\nprintCSVData Prints:");
-  console.log(csvData);
+// Save data to a file
+function saveToFile(data) {
+  fs.writeFile('./inputtest.csv', data, { flag: 'w' }, function(err) {
+    if (err) {
+      console.error('Error saving data to file:', err);
+    } else {
+      console.log('Data saved to file successfully.');
+    }
+  });
 }
+
+
+
+
+
 
 // Parses and sets detailed info of given song to CSV file.
 async function printSongDetailsToCSV(songCode) {
@@ -223,6 +232,34 @@ function printRowsWithDelay(rows) {
 const csvFilePath = 'C:\\Users\\MaxwellV\\Desktop\\song_id.csv';
 // readCSV(csvFilePath);
 
+
+const readFile = util.promisify(fs.readFile);
+
+async function getRandomSongIDs() {
+  try {
+    const songIDs = await readFile('./song_id.csv', 'utf8');
+    const parsedData = songIDs
+      .trim() // Remove leading/trailing whitespace
+      .split('\n'); // Split the string into an array of lines
+
+    const randomSongIDs = [];
+    const totalSongs = parsedData.length;
+
+    for (let i = 0; i < 3; i++) {
+      const randomIndex = Math.floor(Math.random() * totalSongs);
+      const randomSongID = parsedData[randomIndex];
+      randomSongIDs.push(randomSongID);
+    }
+
+    // console.log(randomSongIDs);
+    return randomSongIDs;
+  } catch (error) {
+    console.error('Error reading song ID file:', error);
+    return [];
+  }
+}
+
+
 async function getTracks() {
   // let limit = 50
   // let  offset = 10
@@ -254,5 +291,5 @@ async function getTracks() {
 }
 
 // Share these function in this file.
-module.exports = { getAccessToken, getTracksFromSongIDs, getTracksFromPlayList, getPlaylistName, parseUserInput, getTracks };
+module.exports = { getAccessToken, getTracksFromSongIDs, getTracksFromPlayList, getPlaylistName, parseUserInput, getTracks, getRandomSongIDs };
 
