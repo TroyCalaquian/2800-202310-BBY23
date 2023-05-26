@@ -237,6 +237,7 @@ const readFile = util.promisify(fs.readFile);
 
 async function getRandomSongIDs() {
   try {
+    getAccessToken();
     const songIDs = await readFile('./song_id.csv', 'utf8');
     const parsedData = songIDs
       .trim() // Remove leading/trailing whitespace
