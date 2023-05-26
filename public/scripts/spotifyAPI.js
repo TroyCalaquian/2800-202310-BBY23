@@ -55,7 +55,7 @@ async function getTracksFromSongIDs(songIdArray) {
 
 // Gets displayable data from songs in a given playlist ID.
 async function getTracksFromPlayList(playlistId) {
-  getAccessToken();
+  await getAccessToken();
   try {
     const response = await spotifyAPI.getPlaylistTracks(playlistId);
     const tracks = response.body.items;
@@ -80,7 +80,7 @@ async function getTracksFromPlayList(playlistId) {
 
 // Gets playlist name from playlist ID.
 async function getPlaylistName(playlistID) {
-  getAccessToken();
+  await getAccessToken();
   try {
     const response = await spotifyAPI.getPlaylist(playlistID);
     const playlistName = response.body.name;
@@ -156,7 +156,7 @@ function saveToFile(data) {
 
 // Parses and sets detailed info of given song to CSV file.
 async function printSongDetailsToCSV(songCode) {
-  getAccessToken();
+  await getAccessToken();
 
   const response = await spotifyAPI.getAudioFeaturesForTrack(songCode);
   const audioFeatures = response.body;
@@ -237,7 +237,7 @@ const readFile = util.promisify(fs.readFile);
 
 async function getRandomSongIDs() {
   try {
-    getAccessToken();
+    await getAccessToken();
     const songIDs = await readFile('./song_id.csv', 'utf8');
     const parsedData = songIDs
       .trim() // Remove leading/trailing whitespace

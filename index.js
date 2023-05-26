@@ -117,7 +117,7 @@ app.get("/inputSong", hasSession, async (req, res) => {
 });
 
 app.get("/aiData", async (req, res) => {
-  getAccessToken();
+  await getAccessToken();
   const songIdArray = req.query.addedSongs
     ? req.query.addedSongs.split(",")
     : [];
@@ -140,7 +140,7 @@ app.get("/aiData", async (req, res) => {
 });
 
 async function sendToAI() {
-  getAccessToken();
+  await getAccessToken();
   file = "./inputtest.csv";
   var songID = await runpyfile(file);
   // const array = songID.split(','); // Split the string using comma as delimiter
@@ -167,7 +167,7 @@ app.get("/error", (req, res) => {
 
 app.get("/", async (req, res) => {
   try {
-    getAccessToken();
+    await getAccessToken();
     var sessionState = req.session.authenticated;
     var username = req.session.name;
     const randomSongIDs = await getRandomSongIDs(); // Get 3 random song IDs
@@ -444,7 +444,7 @@ app.get("/logout", (req, res) => {
 
 app.get("/home", hasSession, async (req, res) => {
   try {
-    getAccessToken();
+    await getAccessToken();
     var sessionState = req.session.authenticated;
     var username = req.session.name;
     const randomSongIDs = await getRandomSongIDs(); // Get 3 random song IDs
@@ -464,7 +464,7 @@ app.get("/home", hasSession, async (req, res) => {
 
 app.get("/profile", hasSession, async (req, res) => {
   try {
-    getAccessToken();
+    await getAccessToken();
     const user = await userCollection.findOne({ username: req.session.name });
 
     res.render("profile", { user: user, userName: req.session.name });
