@@ -30,10 +30,17 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration);
 
 /* Linked JS file's functions */
-const {runpyfile} = require('./AI.js')
-const { getAccessToken, getTracksFromSongIDs, getTracksFromPlayList, getPlaylistName, parseUserInput, getTracks, getRandomSongIDs } = require('./public/scripts/spotifyAPI.js');
+const { runpyfile } = require("./AI.js");
+const {
+  getAccessToken,
+  getTracksFromSongIDs,
+  getTracksFromPlayList,
+  getPlaylistName,
+  parseUserInput,
+  getTracks,
+  getRandomSongIDs,
+} = require("./public/scripts/spotifyAPI.js");
 require("./utils.js");
-const {runpyfile} = require('./AI.js')
 
 /* Node Server Setups */
 app.set("view engine", "ejs");
@@ -56,9 +63,9 @@ const playlistCollection = database
   .collection("playlists");
 
 /* Spotify Variables */
-const redirectURI = 'http://localhost:3000/callback';
-const successRedirect = '/success';
-const errorRedirect = '/error';
+const redirectURI = "http://localhost:3000/callback";
+const successRedirect = "/success";
+const errorRedirect = "/error";
 
 var mongoStore = MongoStore.create({
   mongoUrl: `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/?retryWrites=true&w=majority`,
@@ -82,7 +89,7 @@ app.use(async function (req, res, next) {
   res.locals.userLoginStatus = userLoginStatus;
   if (res.locals.userLoginStatus) {
     const user = await userCollection.findOne({ username: req.session.name });
-     res.locals.user = user;
+    res.locals.user = user;
   } else {
     res.locals.user = null;
   }
@@ -97,39 +104,42 @@ function hasSession(req, res, next) {
   }
 }
 
-app.get('/inputSong', hasSession, async (req, res) => {
+app.get("/inputSong", hasSession, async (req, res) => {
   let addedSongs = req.query.addedSongs || [];
 
-
-  if (typeof addedSongs === 'string') {
-    addedSongs = addedSongs.split(','); // Split the string by commas to create an array
+  if (typeof addedSongs === "string") {
+    addedSongs = addedSongs.split(","); // Split the string by commas to create an array
   }
 
   const parsedSongs = await getTracksFromSongIDs(addedSongs);
-  
-  res.render('userInput', { inputArray: parsedSongs });
+
+  res.render("userInput", { inputArray: parsedSongs });
 });
 
-app.get('/aiData', async (req, res) => {
-  const songIdArray = req.query.addedSongs ? req.query.addedSongs.split(',') : [];
+app.get("/aiData", async (req, res) => {
+  const songIdArray = req.query.addedSongs
+    ? req.query.addedSongs.split(",")
+    : [];
 
   parseUserInput(songIdArray);
   // await sendToAI()
 
   // Replaced by AI recommendation
   // const songRecommendations =   ['03tqyYWC9Um2ZqU0ZN849H', '03tqyYWC9Um2ZqU0ZN849H']
-  const songRecommendationsString = await sendToAI()
+  const songRecommendationsString = await sendToAI();
   const songRecommendations = JSON.parse(songRecommendationsString);
   // console.log(typeof songRecommendations)
   // setTimeout(() => {
-    const recommendationsQuery = songRecommendations.map(item => encodeURIComponent(item)).join(',');
- // Encode and join the array
-    res.redirect('/playlist?recommendations=' + recommendationsQuery);
+  const recommendationsQuery = songRecommendations
+    .map((item) => encodeURIComponent(item))
+    .join(",");
+  // Encode and join the array
+  res.redirect("/playlist?recommendations=" + recommendationsQuery);
   // }, 1500);
 });
 
 async function sendToAI() {
-  file = './inputtest.csv';
+  file = "./inputtest.csv";
   var songID = await runpyfile(file);
   // const array = songID.split(','); // Split the string using comma as delimiter
   console.log(songID);
@@ -139,24 +149,37 @@ async function sendToAI() {
 app.get("/playlist", async (req, res) => {
   await getAccessToken();
 
-  const recommendations = req.query.recommendations ? req.query.recommendations.split(',') : [];
+  const recommendations = req.query.recommendations
+    ? req.query.recommendations.split(",")
+    : [];
 
   // Gets array of song details to display on page
   const tracksDetails = await getTracksFromSongIDs(recommendations);
 
-  res.render('success', { inputArray: tracksDetails });
+  res.render("success", { inputArray: tracksDetails });
 });
 
-
-app.get('/error', (req,res) => {
+app.get("/error", (req, res) => {
   res.render("error");
 });
 
-app.get("/", (req, res) => {
-  var sessionState = req.session.authenticated;
-  var username = req.session.name;
+app.get("/", async (req, res) => {
+  try {
+    var sessionState = req.session.authenticated;
+    var username = req.session.name;
+    const randomSongIDs = await getRandomSongIDs(); // Get 3 random song IDs
 
-  res.render("index", { isLoggedIn: sessionState, userName: username });
+    const tracksDetails = await getTracksFromSongIDs(randomSongIDs);
+
+    res.render("index", {
+      inputArray: tracksDetails,
+      isLoggedIn: sessionState,
+      userName: username,
+    });
+  } catch (error) {
+    console.error("Error:", error);
+    res.render("error"); // Render the 'error' template in case of an error
+  }
 });
 
 app.get("/callback", async (req, res) => {
@@ -256,7 +279,7 @@ app.post("/loggingin", async (req, res) => {
 });
 
 app.get("/loggedin", (req, res) => {
-  res.redirect("/welcome");
+  res.redirect("/home");
 });
 
 app.get("/signup", (req, res) => {
@@ -312,7 +335,9 @@ app.post("/submitUser", upload.single("profilePicture"), async (req, res) => {
       .toBuffer();
 
     // Create a base64 data URL with the correct mime type
-    const base64DataUrl = `data:image/jpeg;base64,${resizedImageData.toString("base64")}`;
+    const base64DataUrl = `data:image/jpeg;base64,${resizedImageData.toString(
+      "base64"
+    )}`;
     await userCollection.insertOne({
       username: username,
       password: hashedPassword,
@@ -329,13 +354,6 @@ app.post("/submitUser", upload.single("profilePicture"), async (req, res) => {
     res.status(500).send("Failed to update photo.");
   }
   console.log("Inserted user");
-});
-
-app.get("/welcome", hasSession, (req, res) => {
-  res.render("index", {
-    isLoggedIn: req.session.authenticated,
-    userName: req.session.name,
-  });
 });
 
 app.get("/changePassword", (req, res) => {
@@ -421,20 +439,23 @@ app.get("/logout", (req, res) => {
   return res.redirect("/");
 });
 
-
 app.get("/home", hasSession, async (req, res) => {
   try {
     var sessionState = req.session.authenticated;
-  var username = req.session.name;
+    var username = req.session.name;
     const randomSongIDs = await getRandomSongIDs(); // Get 3 random song IDs
 
     const tracksDetails = await getTracksFromSongIDs(randomSongIDs);
 
-    res.render('index', { inputArray: tracksDetails, isLoggedIn: sessionState, userName: username });
-} catch (error) {
-  console.error('Error:', error);
-  res.render('error'); // Render the 'error' template in case of an error
-}
+    res.render("index", {
+      inputArray: tracksDetails,
+      isLoggedIn: sessionState,
+      userName: username,
+    });
+  } catch (error) {
+    console.error("Error:", error);
+    res.render("error"); // Render the 'error' template in case of an error
+  }
 });
 
 app.get("/profile", hasSession, async (req, res) => {
