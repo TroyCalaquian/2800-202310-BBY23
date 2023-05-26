@@ -5,16 +5,8 @@
 
 <%- include('./templates/header') %>
 
-<h1 class="centered">Spotify Loaded</h1>
-
-<form onsubmit="handleFormSubmit(event)" class="centered">
-  <label for="playlistURL">Playlist URL:</label>
-  <input type="text" id="playlistURL" name="playlistURL">
-  <button type="submit">Submit</button>
-</form><br>
-
 <% if (inputArray && inputArray.length) { %>
-  <h3 class="centered"> Code: <%= playlistCode %></h3><br>
+  <br><h2 class="centered">We think you'd like:</h2><br>
 
   <div class="card-container d-flex justify-content-start centered">
     <% inputArray.forEach(function(entry) { %>

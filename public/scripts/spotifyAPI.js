@@ -1,6 +1,8 @@
 // Require any necessary modules
 const SpotifyWebApi = require('spotify-web-api-node');
 require('dotenv').config();
+const fs = require('fs');
+const csv = require('csv-parser');
 
 // .env secrets
 const spotify_client_id = process.env.SPOTIFY_CLIENT_ID;
@@ -12,7 +14,7 @@ const spotifyAPI = new SpotifyWebApi({
   clientSecret: spotify_client_secret,
 });
 
-// Function that calls for a API token
+// Gets access token if one doesn't already exist.
 async function getAccessToken() {
   if (!spotifyAPI.getAccessToken()) {
     const sData = await spotifyAPI.clientCredentialsGrant();
@@ -21,12 +23,38 @@ async function getAccessToken() {
   }
 }
 
-/** Gets the details for each song in a playlist.
- * 
- * @param {*} playlistId Playlist ID for playlist to get
- * @returns 
- */
+// Gets displayable data from song ID's in an array.
+async function getTracksFromSongIDs(songIdArray) {
+  await getAccessToken();
+
+  try {
+    const songsArray = [];
+    if (songIdArray) {
+      for (const songId of songIdArray) {
+        // Get data from Spotify
+        const response = await spotifyAPI.getTrack(songId);
+        const { name, artists, external_urls, album } = response.body;
+
+        // Get specific data points
+        const songUrlLocal = external_urls.spotify;
+        const artistNamesL = artists.map(artist => artist.name).join(' & ');
+        const imageURLLocal = album.images.length > 0 ? album.images[0].url : "https://dummyimage.com/500x500/000/fff&text=Record+Image";
+
+        // Store retrieved data in JSON object, then store into array
+        const jsonParsed = { songID: songId, songName: name, artists: artistNamesL, songURL: songUrlLocal, imageURL: imageURLLocal };
+        songsArray.push(jsonParsed);
+      }
+    }
+    return songsArray;
+  } catch (error) {
+    console.error('Error retrieving song details:', error);
+    throw error;
+  }
+}
+
+// Gets displayable data from songs in a given playlist ID.
 async function getTracksFromPlayList(playlistId) {
+  getAccessToken();
   try {
     const response = await spotifyAPI.getPlaylistTracks(playlistId);
     const tracks = response.body.items;
@@ -49,7 +77,9 @@ async function getTracksFromPlayList(playlistId) {
   }
 }
 
+// Gets playlist name from playlist ID.
 async function getPlaylistName(playlistID) {
+  getAccessToken();
   try {
     const response = await spotifyAPI.getPlaylist(playlistID);
     const playlistName = response.body.name;
@@ -60,8 +90,65 @@ async function getPlaylistName(playlistID) {
   }
 }
 
+async function parseUserInput(songIDArray) {
+  await getAccessToken();
 
-async function getSongDetails(songCode) {
+  const extractedData = [];
+
+  const headers = [
+    'danceability',
+    'energy',
+    'key',
+    'loudness',
+    'mode',
+    'speechiness',
+    'acousticness',
+    'instrumentalness',
+    'liveness',
+    'valence',
+    'tempo',
+  ];
+
+  for (const songID of songIDArray) {
+    const response = await spotifyAPI.getAudioFeaturesForTrack(songID);
+    const audioFeatures = response.body;
+
+    const csvData = [];
+    csvData.push(headers.join(',')); // Add header row
+
+    const songData = [
+      audioFeatures.danceability.toString(),
+      audioFeatures.energy.toString(),
+      audioFeatures.key.toString(),
+      audioFeatures.loudness.toString(),
+      audioFeatures.mode.toString(),
+      audioFeatures.speechiness.toString(),
+      audioFeatures.acousticness.toString(),
+      audioFeatures.instrumentalness.toString(),
+      audioFeatures.liveness.toString(),
+      audioFeatures.valence.toString(),
+      audioFeatures.tempo.toString(),
+    ];
+
+    csvData.push(songData.join(',')); // Add song data row
+
+    extractedData.push(csvData.join('\n')); // Push CSV data as a string
+  }
+
+  printCSVData(extractedData.join('\n\n'));
+  return extractedData;
+}
+
+// Prints data 
+function printCSVData(csvData) {
+  console.log("\nprintCSVData Prints:");
+  console.log(csvData);
+}
+
+// Parses and sets detailed info of given song to CSV file.
+async function printSongDetailsToCSV(songCode) {
+  getAccessToken();
+
   const response = await spotifyAPI.getAudioFeaturesForTrack(songCode);
   const audioFeatures = response.body;
 
@@ -85,41 +172,56 @@ async function getSongDetails(songCode) {
     valence: audioFeatures.valence,
     tempo: audioFeatures.tempo,
   };
+
+  // Generate CSV string
   const csvString = Object.values(extractedData).join(',') + '\n';
-  // fs.appendFileSync('song_details.csv', csvString, 'utf8');
+
+  // Save CSV string to a file
+  fs.appendFileSync('song_details.csv', csvString, 'utf8');
 };
 
-const fs = require('fs');
-const csv = require('csv-parser');
 
-var printAt = 0;
 
-// function readCSVWithDelay(csvFilePath) {
-//   const rows = [];
-//   fs.createReadStream(csvFilePath)
-//     .pipe(csv())
-//     .on('data', (row) => {
-//       rows.push(row);
-//     })
-//     .on('end', () => {
-//       printRowsWithDelay(rows);
-//     });
-// }
 
-// function printRowsWithDelay(rows) {
-//   let delay = 0;
-//   for (let i = 0; i < rows.length; i++) {
-//     setTimeout(async () => {
-//       await getAccessToken();
-//       const songID = rows[i].song_ID; // Replace "song_ID" with the actual property name
-//       console.log(songID);
-//       getSongDetails(songID)
-//     }, delay);
-//     delay += 3000; // 30-second delay
-//   }
-// }
+// Usage example
+async function main() {
+  await getAccessToken();
+
+  // const genre = 'hip-hop';
+  // const trackIds = await searchTracksByGenre(genre);
+
+  // console.log("yes seirrr" + trackIds);
+  getTracks()
+}
+
+
+// Prints CSV file, song_id.csv in this case
+function readCSV(csvFilePath) {
+  const rows = [];
+  fs.createReadStream(csvFilePath)
+    .pipe(csv())
+    .on('data', (row) => {
+      rows.push(row);
+    })
+    .on('end', () => {
+      printRowsWithDelay(rows);
+    });
+}
+
+// Calls printSongDetailsToCSV to print each entry of given array. Delay prevents rate limit restrictions with Spotify API.
+function printRowsWithDelay(rows) {
+  let delay = 0;
+  for (let i = 0; i < rows.length; i++) {
+    setTimeout(async () => {
+      await getAccessToken();
+      const songID = rows[i].song_ID; // Replace "song_ID" with the actual property name
+      printSongDetailsToCSV(songID)
+    }, delay);
+    delay += 1500; // 30-second delay
+  }
+}
 const csvFilePath = 'C:\\Users\\MaxwellV\\Desktop\\song_id.csv';
-// readCSVWithDelay(csvFilePath);
+// readCSV(csvFilePath);
 
 async function getTracks() {
   // let limit = 50
@@ -137,6 +239,7 @@ async function getTracks() {
   //   console.error(err);
   // });
 
+  // let ids = ''
   // spotifyAPI.searchTracks('genre:hip-hop', {limit, offset})
   // .then(function(data) {
   //   for(i =0; i <  data.body.tracks.items.length; i++){
@@ -150,39 +253,6 @@ async function getTracks() {
   // });
 }
 
-// Search tracks by genre and retrieve the track IDs
-// async function searchTracksByGenre(genre) {
-//   console.log("gebnre searching")
-//   const limit = 1; // Adjust the number of tracks per request as needed
-//   let offset = 0;
-//   let total = 1; // Start with a value that exceeds the limit
-// 
-//   const trackIds = [];
-// 
-//   while (offset < total) {
-//     const data = await spotifyAPI.searchTracks(`genre:${genre}`, { limit, offset });
-//     const tracks = data.body.tracks;
-// 
-//     total = tracks.total;
-//     offset += limit;
-// 
-//     for (const track of tracks.items) {
-//       trackIds.push(track.id);
-//     }
-//   }
-// 
-//   return trackIds;
-// }
-// 
-// Usage example
-// async function main() {
-//   await getAccessToken();
-// 
-//   const genre = 'hip-hop';
-//   const trackIds = await searchTracksByGenre(genre);
-// 
-//   console.log("yes seirrr" + trackIds);
-// }
+// Share these function in this file.
+module.exports = { getAccessToken, getTracksFromSongIDs, getTracksFromPlayList, getPlaylistName, parseUserInput, getTracks };
 
-// Export the functions or the entire Spotify API module
-module.exports = { getTracks, getSongDetails, getTracksFromPlayList, spotifyAPI, getAccessToken, getPlaylistName };

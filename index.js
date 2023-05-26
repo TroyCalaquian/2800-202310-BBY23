@@ -30,14 +30,8 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration);
 
 /* Linked JS file's functions */
-const {
-  getTracks,
-  getSongDetails,
-  getTracksFromPlayList,
-  spotifyAPI,
-  getAccessToken,
-  getPlaylistName,
-} = require("./public/scripts/spotifyAPI.js");
+const {runpyfile} = require('./AI.js')
+const { getAccessToken, getTracksFromSongIDs, getTracksFromPlayList, getPlaylistName, parseUserInput, getTracks } = require('./public/scripts/spotifyAPI.js');
 require("./utils.js");
 
 /* Node Server Setups */
@@ -61,11 +55,9 @@ const playlistCollection = database
   .collection("playlists");
 
 /* Spotify Variables */
-const redirectURI = "http://localhost:3000/callback";
-const successRedirect = "/success";
-const errorRedirect = "/error";
-const playListCodeLocal = "6RcPwqOPVVyU3H9sRxJOrR"; // To be replace w/ user inputs
-const songCodeLocal = "3F5CgOj3wFlRv51JsHbxhe"; // To be replaces w/ user inputs
+const redirectURI = 'http://localhost:3000/callback';
+const successRedirect = '/success';
+const errorRedirect = '/error';
 
 var mongoStore = MongoStore.create({
   mongoUrl: `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/?retryWrites=true&w=majority`,
@@ -104,42 +96,55 @@ function hasSession(req, res, next) {
   }
 }
 
-app.get("/spotify", async (req, res) => {
-  try {
-    await getAccessToken();
+app.get('/inputSong', async (req, res) => {
+  let addedSongs = req.query.addedSongs || [];
 
-    res.redirect("playlist");
-  } catch (error) {
-    console.error("Error:", error);
-    res.status(500).json({ error: "An error occurred" });
+
+  if (typeof addedSongs === 'string') {
+    addedSongs = addedSongs.split(','); // Split the string by commas to create an array
   }
+
+  const parsedSongs = await getTracksFromSongIDs(addedSongs);
+  
+  res.render('userInput', { inputArray: parsedSongs });
 });
 
-app.get("/playlist", async (req, res) => {
+app.get('/aiData', (req, res) => {
+  const songIdArray = req.query.addedSongs ? req.query.addedSongs.split(',') : [];
+
+  const parsedInput = parseUserInput(songIdArray);
+
+  // const songRecommendations = await sendToAI(parsedInput);
+
+  // Replaced by AI recommendation
+  const songRecommendations = ["3F5CgOj3wFlRv51JsHbxhe", "5e9TFTbltYBg2xThimr0rU"];
+
+  setTimeout(() => {
+    const recommendationsQuery = encodeURIComponent(songRecommendations.join(',')); // Encode and join the array
+    res.redirect('/playlist?recommendations=' + recommendationsQuery);
+  }, 1500);
+});
+
+app.get('/success', async (req, res) => {
+  var file = './inputtest.csv'
   await getAccessToken();
+  const songID = await runpyfile(file);
+  console.log("song_ID: " + songID);
+  // const tracksDetails = await getTracksFromPlayList(playListCodeLocal);
+  // const songDetails = await getSongDetails(songCodeLocal);
+  await getTracks();
+  // main()
 
-  // Get playlistID from URL
-  const playlistID = req.query.playlistID;
+  const recommendations = req.query.recommendations ? req.query.recommendations.split(',') : [];
 
-  // Prints ID if it exists, TESTING PRINT
-  if (playlistID) {
-    console.log("Playlist ID:", playlistID);
-  }
+  // Gets array of song details to display on page
+  const tracksDetails = await getTracksFromSongIDs(recommendations);
 
-  // Gets data if playlistID exists, sets to null if not
-  const tracksDetails = playlistID
-    ? await getTracksFromPlayList(playlistID)
-    : null;
-  const playlistName = playlistID ? await getPlaylistName(playlistID) : null;
-
-  // Render success, it prints nothing if parameters are null
-  res.render("success", {
-    inputArray: tracksDetails,
-    playlistCode: playlistName,
-  });
+  res.render('success', { inputArray: tracksDetails });
 });
 
-app.get("/error", (req, res) => {
+
+app.get('/error', (req,res) => {
   res.render("error");
 });
 
@@ -425,113 +430,6 @@ app.get("/profile", hasSession, async (req, res) => {
     console.error("Failed to retrieve user data:", error);
     res.status(500).send("Failed to retrieve user data.");
   }
-});
-
-app.get("/pickTags", hasSession, async (req, res) => {
-  req.session.pickedTags = req.session.pickedTags || [];
-  req.session.blacklistedTags = req.session.blacklistedTags || [];
-
-  const genreCollection = database.db("genres").collection("genres");
-  var collection = await genreCollection
-    .find({})
-    .project({ genres: 1 })
-    .toArray();
-  var tags = collection[0].genres;
-
-  const searchQuery = req.query.search || "";
-
-  if (searchQuery === "RickRoll") {
-    // Redirect to the Rick Astley's "Never Gonna Give You Up" video on YouTube
-    return res.redirect("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
-  }
-
-  // Filter the tags based on the search query
-  const filteredTags = tags.filter((tag) =>
-    tag.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  res.render("pickTags", {
-    tags: filteredTags,
-    pickedTags: req.session.pickedTags,
-    blacklistedTags: req.session.blacklistedTags,
-    searchQuery: searchQuery,
-  });
-});
-
-app.post("/resetTags", hasSession, (req, res) => {
-  // Reset the pickedTags and blacklistedTags arrays in the session object
-  req.session.pickedTags = [];
-  req.session.blacklistedTags = [];
-
-  req.query.search = "";
-
-  res.redirect("/pickTags");
-});
-
-app.post("/updateTags", hasSession, genreMulter.array("tags"), (req, res) => {
-  const tags = req.body.tags; // Array of selected tags
-  const actions = req.body.actions; // Array of corresponding actions for each tag
-
-  // Retrieve the pickedTags and blacklistedTags arrays from the session object
-  let pickedTags = [];
-  let blacklistedTags = [];
-
-  // TODO: Add check for whether the user already inputted a playlist
-  if (typeof tags === "undefined" || tags.length == 0) {
-    // No tags were selected
-    res.redirect("/confirmTags");
-    return;
-  }
-
-  for (let i = 0; i < tags.length; i++) {
-    var tag = tags[i];
-    var action = actions[i];
-
-    // Handle the selected action for each tag
-    if (action === "add") {
-      pickedTags.push(tag); // Add the tag to the pickedTags array
-    } else if (action === "blacklist") {
-      blacklistedTags.push(tag); // Add the tag to the blacklistedTags array
-    } else if (action === "blank") {
-      // Remove the tag from both arrays, if it exists
-      // Note: this might not be needed later
-      pickedTags = pickedTags.filter((pickedTag) => pickedTag !== tag);
-      blacklistedTags = blacklistedTags.filter(
-        (blacklistedTag) => blacklistedTag !== tag
-      );
-    }
-  }
-
-  // Store the pickedTags and blacklistedTags arrays in the session object
-  req.session.pickedTags = pickedTags;
-  req.session.blacklistedTags = blacklistedTags;
-
-  // Redirect back to the /pickTags page or any other desired page
-  res.redirect("/confirmTags");
-});
-
-app.get("/confirmTags", hasSession, (req, res) => {
-  console.log("Picked tags length: " + req.session.pickedTags.length);
-  console.log("Blacklisted tags length: " + req.session.blacklistedTags.length);
-  res.render("confirmTags", {
-    pickedTags: req.session.pickedTags,
-    blacklistedTags: req.session.blacklistedTags,
-  });
-});
-
-app.post("/confirmChoices", hasSession, async (req, res) => {
-  // TODO: Put AI stuff here
-  res.redirect("/results");
-});
-
-app.get("/results", hasSession, (req, res) => {
-  console.log("PickedTags: " + req.session.pickedTags);
-  console.log("BlacklistedTags: " + req.session.blacklistedTags);
-  res.render("results");
-});
-
-app.get("/addMusic", hasSession, (req, res) => {
-  res.render("addMusic");
 });
 
 app.post("/editUsername", hasSession, async (req, res) => {
